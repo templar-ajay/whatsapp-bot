@@ -1,0 +1,12 @@
+.container {
+  text-align: center;
+}
+.primary-text {
+  display: block;
+  margin-bottom: 16px;
+}
+.secondary-text {
+  display: block;
+  font-size: small;
+  font-weight: lighter;
+}

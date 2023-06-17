@@ -1,0 +1,7 @@
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+.env
+package-lock.json
+src/
+index-old.js
