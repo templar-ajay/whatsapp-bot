@@ -50,6 +50,7 @@ app.post("/send-message", (req, res) => {
   );
   if (theClient) {
     sendMessage(theClient, phoneNumber, message);
+    res.send(`message ${message} sent to ${phoneNumber}`);
   }
 });
 
@@ -72,12 +73,13 @@ app.listen(port, () => {
       args: ["--no-sandbox"],
     },
     authStrategy: new LocalAuth({
-      clientId: "client-extension-test-2",
+      clientId: "test1",
     }),
   });
 
   client.on("qr", (qr) => {
     messageForClient = qr;
+    console.log("qr", qr);
   });
 
   client.on("ready", () => {
@@ -86,6 +88,12 @@ app.listen(port, () => {
     messageForClient = "Client is ready!";
     if (wsConnection) {
       wsConnection.send(messageForClient);
+    }
+  });
+
+  client.on("message", (message) => {
+    if (message.body === "!ping") {
+      message.reply("pong");
     }
   });
 

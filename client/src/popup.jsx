@@ -5,7 +5,7 @@ function Popup() {
   const [state, setState] = useState("start");
   const [QRCode, setQRCode] = useState("");
   useEffect(() => {
-    const webSocket = new WebSocket("ws://whatsapp-81hl.onrender.com/");
+    const webSocket = new WebSocket("ws://localhost:8080/");
     webSocket.onopen = (event) => {
       console.log("connection opened");
       webSocket.send("request-qr");
