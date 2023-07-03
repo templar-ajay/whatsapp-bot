@@ -46,7 +46,7 @@ app.post("/send-message", (req, res) => {
   const { phoneNumber, message } = req.body;
   console.log("request received",req.body);
   if (theClient) {
-    if(phoneNumber&&&message){
+    if(phoneNumber&&message){
     const formattedPhoneNumber = phoneNumber.replace("+","").replace(" ","");
     sendMessage(theClient, formattedPhoneNumber, message);
     res.send(`message ${message} sent to ${phoneNumber}`);
