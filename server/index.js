@@ -44,13 +44,14 @@ app.get("/", function (req, res, next) {
 });
 app.post("/send-message", (req, res) => {
   const { phoneNumber, message } = req.body;
-  console.log(
-    "received a request to send message- '" + message + "' to phone number",
-    phoneNumber
-  );
+  console.log("request received",req.body);
   if (theClient) {
+    if(phoneNumber&&&message){
     sendMessage(theClient, phoneNumber, message);
     res.send(`message ${message} sent to ${phoneNumber}`);
+    }else res.send('failed to send message, please check if you are sending the data in JSON format in body of a POST request.')
+  }else{
+    res.send('client is not ready yet')
   }
 });
 
