@@ -47,7 +47,8 @@ app.post("/send-message", (req, res) => {
   console.log("request received",req.body);
   if (theClient) {
     if(phoneNumber&&&message){
-    sendMessage(theClient, phoneNumber, message);
+    const formattedPhoneNumber = phoneNumber.replace("+","").replace(" ","");
+    sendMessage(theClient, formattedPhoneNumber, message);
     res.send(`message ${message} sent to ${phoneNumber}`);
     }else res.send('failed to send message, please check if you are sending the data in JSON format in body of a POST request.')
   }else{
