@@ -43,8 +43,8 @@ app.get("/", function (req, res, next) {
   res.end();
 });
 app.post("/send-message", (req, res) => {
-  const { phoneNumber, message } = req.body;
-  console.log("request received",req.body);
+  const { phoneNumber, message } = req.body.customData;
+  console.log("request received",req.body.customData);
   if (theClient) {
     if(phoneNumber&&message){
     const formattedPhoneNumber = phoneNumber.replace("+","").replace(" ","");
