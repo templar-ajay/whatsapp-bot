@@ -43,16 +43,21 @@ app.get("/", function (req, res, next) {
   res.end();
 });
 app.post("/send-message", (req, res) => {
-  const { phoneNumber, message } = req.body.customData;
-  console.log("request received",req.body.customData);
+  const { phoneNumber, message } = req.body?.customData;
+  console.log("request received", req.body?.customData);
   if (theClient) {
-    if(phoneNumber&&message){
-    const formattedPhoneNumber = phoneNumber.replace("+","").replace(" ","");
-    sendMessage(theClient, formattedPhoneNumber, message);
-    res.send(`message ${message} sent to ${phoneNumber}`);
-    }else res.send('failed to send message, please check if you are sending the data in JSON format in body of a POST request.')
-  }else{
-    res.send('client is not ready yet')
+    if (phoneNumber && message) {
+      const formattedPhoneNumber = phoneNumber
+        .replace("+", "")
+        .replace(" ", "");
+      sendMessage(theClient, formattedPhoneNumber, message);
+      res.send(`message ${message} sent to ${phoneNumber}`);
+    } else
+      res.send(
+        "failed to send message, please check if you are sending the data in JSON format {customData:{phoneNumber:'+91 8696260393',message:'the message'}} in body of a POST request."
+      );
+  } else {
+    res.send("client is not ready yet");
   }
 });
 
