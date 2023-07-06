@@ -25,15 +25,38 @@ app.get("/", function (req, res, next) {
   res.end();
 });
 app.post("/send-message", (req, res) => {
-  const { phoneNumber, message } = req.body?.customData;
+  const {
+    phoneNumber,
+    message1,
+    message2,
+    message3,
+    message4,
+    message5,
+    message6,
+    message7,
+    message8,
+    message9,
+    message10,
+  } = req.body?.customData;
   console.log("request received", req.body?.customData);
   if (theClient) {
-    if (phoneNumber && message) {
+    if (phoneNumber && message1) {
       const formattedPhoneNumber = phoneNumber
         .replaceAll("+", "")
         .replaceAll(" ", "");
-      sendMessage(theClient, formattedPhoneNumber, message);
-      res.send(`message ${message} sent to ${phoneNumber}`);
+      sendMessage(theClient, formattedPhoneNumber, [
+        message1,
+        message2,
+        message3,
+        message4,
+        message5,
+        message6,
+        message7,
+        message8,
+        message9,
+        message10,
+      ]);
+      res.send(`messages sent to ${phoneNumber}`);
     } else
       res.send(
         "failed to send message, please check if you are sending the data in JSON format {customData:{phoneNumber:'+91 8696260393',message:'the message'}} in body of a POST request."
@@ -98,14 +121,19 @@ function createClient() {
 function sendMessage(
   client,
   phoneNumber = "918696260393",
-  message = "Jai Shree Ram"
+  messages = ["Jai Shree Ram"]
 ) {
+  const filtered = messages.filter((message) => message);
+
   client
-    ?.sendMessage(`${phoneNumber}@c.us`, message)
+    ?.sendMessage(`${phoneNumber}@c.us`, filtered[random(0, filtered.length)])
     .then((response) => {
       console.log("Message sent:", response);
     })
     .catch((error) => {
       console.error("Error sending message:", error);
     });
+}
+function random(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
 }
