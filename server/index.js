@@ -1,29 +1,11 @@
 require("dotenv").config();
+const { Client } = require("whatsapp-web.js");
+
 const port = process.env.PORT;
 let messageForClient = "";
 let wsConnection;
 let theClient;
 
-function sendMessage(
-  client,
-  phoneNumber = "918696260393",
-  message = "Jai Shree Ram"
-) {
-  /**
-   * Replace <recipient-phone-number> with the actual phone number of the recipient (including the country code but excluding any leading zeros or plus sign).
-   */
-  // const phoneNumber = "916283758935";
-  // const message = "Hello, world!";
-
-  client
-    ?.sendMessage(`${phoneNumber}@c.us`, message)
-    .then((response) => {
-      console.log("Message sent:", response);
-    })
-    .catch((error) => {
-      console.error("Error sending message:", error);
-    });
-}
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -66,6 +48,7 @@ app.ws("/", function (ws, req) {
   ws.on("message", function (msg) {
     console.log("message received from client");
     ws.send(messageForClient);
+    wsConnection = ws;
   });
 
   console.log("socket", req.testing);
@@ -73,19 +56,18 @@ app.ws("/", function (ws, req) {
 
 app.listen(port, () => {
   console.log("server running at http://localhost:" + port);
-
-  const { Client, LocalAuth } = require("whatsapp-web.js");
+  createClient();
+});
+function createClient() {
   const client = new Client({
     puppeteer: {
       args: ["--no-sandbox"],
     },
-    authStrategy: new LocalAuth({
-      clientId: "test1",
-    }),
   });
 
   client.on("qr", (qr) => {
     messageForClient = qr;
+    if (wsConnection) wsConnection.send(messageForClient);
     console.log("qr", qr);
   });
 
@@ -104,5 +86,26 @@ app.listen(port, () => {
     }
   });
 
+  client.on("disconnected", (reason) => {
+    console.log("Disconnected:", reason);
+    theClient = false; // to stop sending message functionality
+    createClient();
+  });
+
   client.initialize();
-});
+}
+
+function sendMessage(
+  client,
+  phoneNumber = "918696260393",
+  message = "Jai Shree Ram"
+) {
+  client
+    ?.sendMessage(`${phoneNumber}@c.us`, message)
+    .then((response) => {
+      console.log("Message sent:", response);
+    })
+    .catch((error) => {
+      console.error("Error sending message:", error);
+    });
+}
