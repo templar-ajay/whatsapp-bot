@@ -1,4 +1,5 @@
 # whatsapp-web.js-automatic-messaging-solution
+you can use this solution to send automated whatsapp messages from a CRM or using POST requests.
 
 1. dev commands
    `cd client`
