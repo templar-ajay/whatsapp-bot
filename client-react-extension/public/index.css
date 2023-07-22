@@ -1,0 +1,30 @@
+#react-target {
+  min-width: 340px;
+}
+
+.container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.primary-text {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.secondary-text {
+  display: block;
+  font-size: small;
+  font-weight: lighter;
+}
+
+.reAuth-btn {
+  border: none;
+  color: blue;
+  border-radius: 10px;
+}

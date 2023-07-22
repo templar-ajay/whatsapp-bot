@@ -1,0 +1,439 @@
+clientID <ref *1> Client {
+    _events: [Object: null prototype
+    ] {
+      qr: [Function (anonymous)
+        ],
+      ready: [Function (anonymous)
+        ],
+      disconnected: [Function (anonymous)
+        ]
+    },
+    _eventsCount: 3,
+    _maxListeners: undefined,
+    options: {
+      authStrategy: LocalAuth {
+        dataPath: 'C:\\Users\\ajays\\code\\multi-user\\server-multi-instance\\.wwebjs_auth',
+        clientId: 'uGGCYoa38nrctHAAAt0l4BsyPDsmONBoPLVtid8XKWs',
+        client: [Circular *1
+            ],
+        userDataDir: 'C:\\Users\\ajays\\code\\multi-user\\server-multi-instance\\.wwebjs_auth\\session-uGGCYoa38nrctHAAAt0l4BsyPDsmONBoPLVtid8XKWs'
+        },
+      puppeteer: {
+        headless: true,
+        defaultViewport: null,
+        userDataDir: 'C:\\Users\\ajays\\code\\multi-user\\server-multi-instance\\.wwebjs_auth\\session-uGGCYoa38nrctHAAAt0l4BsyPDsmONBoPLVtid8XKWs'
+        },
+      webVersion: '2.2322.15',
+      webVersionCache: { type: 'local'
+        },
+      authTimeoutMs: 0,
+      qrMaxRetries: 0,
+      takeoverOnConflict: false,
+      takeoverTimeoutMs: 0,
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
+      ffmpegPath: 'ffmpeg',
+      bypassCSP: false,
+      proxyAuthentication: undefined
+    },
+    authStrategy: LocalAuth {
+      dataPath: 'C:\\Users\\ajays\\code\\multi-user\\server-multi-instance\\.wwebjs_auth',
+      clientId: 'uGGCYoa38nrctHAAAt0l4BsyPDsmONBoPLVtid8XKWs',
+      client: [Circular *1
+        ],
+      userDataDir: 'C:\\Users\\ajays\\code\\multi-user\\server-multi-instance\\.wwebjs_auth\\session-uGGCYoa38nrctHAAAt0l4BsyPDsmONBoPLVtid8XKWs'
+    },
+    pupBrowser: <ref *2> Browser {
+      eventsMap: Map(2) { 'targetcreated' => [], 'targetchanged' => []
+        },
+      emitter: {
+        all: [Map
+            ],
+        on: [Function: on
+            ],
+        off: [Function: off
+            ],
+        emit: [Function: emit
+            ]
+        },
+      _ignoredTargets: Set(0) {},
+      _ignoreHTTPSErrors: false,
+      _defaultViewport: null,
+      _process: ChildProcess {
+        _events: [Object: null prototype
+            ],
+        _eventsCount: 1,
+        _maxListeners: undefined,
+        _closesNeeded: 2,
+        _closesGot: 0,
+        connected: false,
+        signalCode: null,
+        exitCode: null,
+        killed: false,
+        spawnfile: 'C:\\Users\\ajays\\code\\multi-user\\server-multi-instance\\node_modules\\puppeteer\\.local-chromium\\win64-982053\\chrome-win\\chrome.exe',
+        _handle: [Process
+            ],
+        spawnargs: [Array
+            ],
+        pid: 13456,
+        stdin: [Socket
+            ],
+        stdout: null,
+        stderr: [Socket
+            ],
+        stdio: [Array
+            ],
+            [Symbol(kCapture)
+            ]: false
+        },
+      _screenshotTaskQueue: TaskQueue { _chain: [Promise
+            ]
+        },
+      _connection: Connection {
+        eventsMap: [Map
+            ],
+        emitter: [Object
+            ],
+        _lastId: 101,
+        _sessions: [Map
+            ],
+        _closed: false,
+        _callbacks: Map(0) {},
+        _url: 'ws: //127.0.0.1:61286/devtools/browser/d275cf00-321d-45b2-9825-0e1a4e3744cf',
+        _delay: 0,
+        _transport: [NodeWebSocketTransport
+            ]
+        },
+      _closeCallback: [Function: bound close
+        ],
+      _targetFilterCallback: [Function (anonymous)
+        ],      
+      _defaultContext: BrowserContext {
+        eventsMap: Map(0) {},
+        emitter: [Object
+            ],
+        _connection: [Connection
+            ],
+        _browser: [Circular *2
+            ],
+        _id: undefined
+        },
+      _contexts: Map(0) {},
+      _targets: Map(5) {
+        '36A695FF4D1B30AC4369E8548B946D2A' => [Target
+            ],   
+        '8c31a4b4-4451-41dd-8836-c560c2bcc139' => [Target
+            ],
+        'dc5b5643-e9a3-415f-acb0-6e60902339a5' => [Target
+            ],
+        '66231D49E2DFC2BF5505277D561AE0D4' => [Target
+            ],   
+        '39BFBB50E6314E87E1033CD2D11032A4' => [Target
+            ]
+        }
+    },
+    pupPage: <ref *3> Page {
+      eventsMap: Map(1) { 'response' => [Array
+            ]
+        },        
+      emitter: {
+        all: [Map
+            ],
+        on: [Function: on
+            ],
+        off: [Function: off
+            ],
+        emit: [Function: emit
+            ]
+        },
+      _closed: false,
+      _timeoutSettings: TimeoutSettings {
+        _defaultTimeout: null,
+        _defaultNavigationTimeout: null
+        },
+      _pageBindings: Map(14) {
+        'loadingScreen' => [AsyncFunction (anonymous)
+            ],   
+        'onAddMessageEvent' => [Function (anonymous)
+            ],    
+        'onChangeMessageTypeEvent' => [Function (anonymous)
+            ],
+        'onChangeMessageEvent' => [Function (anonymous)
+            ], 
+        'onRemoveMessageEvent' => [Function (anonymous)
+            ], 
+        'onMessageAckEvent' => [Function (anonymous)
+            ],    
+        'onChatUnreadCountEvent' => [AsyncFunction (anonymous)
+            ],
+        'onMessageMediaUploadedEvent' => [Function (anonymous)
+            ],
+        'onAppStateChangedEvent' => [AsyncFunction (anonymous)
+            ],
+        'onBatteryStateChangedEvent' => [Function (anonymous)
+            ],
+        'onIncomingCall' => [Function (anonymous)
+            ],       
+        'onReaction' => [Function (anonymous)
+            ],
+        'onRemoveChatEvent' => [Function (anonymous)
+            ],    
+        'onArchiveChatEvent' => [Function (anonymous)
+            ]
+        },
+      _javascriptEnabled: true,
+      _workers: Map(1) { '29BE8BB507A0000FB94401F0A33306C5' => [WebWorker
+            ]
+        },
+      _fileChooserInterceptors: Set(0) {},
+      _userDragInterceptionEnabled: false,
+      _handlerMap: WeakMap { <items unknown>
+        },
+      _client: CDPSession {
+        eventsMap: [Map
+            ],
+        emitter: [Object
+            ],
+        _callbacks: [Map
+            ],
+        _connection: [Connection
+            ],
+        _targetType: 'page',
+        _sessionId: '54C61AB235108B8089B27E80EC7A1BA0'
+        },
+      _target: Target {
+        _targetInfo: [Object
+            ],
+        _browserContext: [BrowserContext
+            ],
+        _targetId: '36A695FF4D1B30AC4369E8548B946D2A',    
+        _sessionFactory: [Function (anonymous)
+            ],
+        _ignoreHTTPSErrors: false,
+        _defaultViewport: null,
+        _screenshotTaskQueue: [TaskQueue
+            ],
+        _pagePromise: [Promise
+            ],
+        _workerPromise: null,
+        _initializedCallback: [Function (anonymous)
+            ],     
+        _initializedPromise: [Promise
+            ],
+        _closedCallback: [Function (anonymous)
+            ],
+        _isClosedPromise: [Promise
+            ],
+        _isInitialized: true
+        },
+      _keyboard: Keyboard {
+        _modifiers: 0,
+        _pressedKeys: Set(0) {},
+        _client: [CDPSession
+            ]
+        },
+      _mouse: Mouse {
+        _x: 0,
+        _y: 0,
+        _button: 'none',
+        _client: [CDPSession
+            ],
+        _keyboard: [Keyboard
+            ]
+        },
+      _touchscreen: Touchscreen { _client: [CDPSession
+            ], _keyboard: [Keyboard
+            ]
+        },
+      _accessibility: Accessibility { _client: [CDPSession
+            ]
+        },
+      _frameManager: FrameManager {
+        eventsMap: [Map
+            ],
+        emitter: [Object
+            ],
+        _frames: [Map
+            ],
+        _contextIdToContext: [Map
+            ],
+        _isolatedWorlds: [Set
+            ],
+        _client: [CDPSession
+            ],
+        _page: [Circular *3
+            ],
+        _networkManager: [NetworkManager
+            ],
+        _timeoutSettings: [TimeoutSettings
+            ],
+        _mainFrame: [Frame
+            ]
+        },
+      _emulationManager: EmulationManager {
+        _emulatingMobile: false,
+        _hasTouch: false,
+        _client: [CDPSession
+            ]
+        },
+      _tracing: Tracing { _recording: false, _path: '', _client: [CDPSession
+            ]
+        },
+      _coverage: Coverage { _jsCoverage: [JSCoverage
+            ], _cssCoverage: [CSSCoverage
+            ]
+        },
+      _screenshotTaskQueue: TaskQueue { _chain: [Promise
+            ]
+        },
+      _viewport: null
+    },
+    info: ClientInfo {
+      pushname: 'Ajay',
+      wid: {
+        server: 'c.us',
+        user: '918696260393',
+        _serialized: '918696260393@c.us'
+        },
+      me: {
+        server: 'c.us',
+        user: '918696260393',
+        _serialized: '918696260393@c.us'
+        },
+      phone: undefined,
+      platform: 'android'
+    },
+    interface: InterfaceController {
+      pupPage: <ref *3> Page {
+        eventsMap: [Map
+            ],
+        emitter: [Object
+            ],
+        _closed: false,
+        _timeoutSettings: [TimeoutSettings
+            ],
+        _pageBindings: [Map
+            ],
+        _javascriptEnabled: true,
+        _workers: [Map
+            ],
+        _fileChooserInterceptors: Set(0) {},
+        _userDragInterceptionEnabled: false,
+        _handlerMap: [WeakMap
+            ],
+        _client: [CDPSession
+            ],
+        _target: [Target
+            ],
+        _keyboard: [Keyboard
+            ],
+        _mouse: [Mouse
+            ],
+        _touchscreen: [Touchscreen
+            ],
+        _accessibility: [Accessibility
+            ],
+        _frameManager: [FrameManager
+            ],
+        _emulationManager: [EmulationManager
+            ],
+        _tracing: [Tracing
+            ],
+        _coverage: [Coverage
+            ],
+        _screenshotTaskQueue: [TaskQueue
+            ],
+        _viewport: null
+        }
+    },
+    [Symbol(kCapture)
+    ]: false
+}
+  Message {
+    _data: {
+      id: {
+        fromMe: true,
+        remote: [Object
+            ],
+        id: '3EB0D471AED798BFFEC302',
+        self: 'out',
+        _serialized: 'true_918696260393@c.us_3EB0D471AED798BFFEC302_out'
+        },
+      body: 'test message 3',
+      type: 'chat',
+      t: 1690044762,
+      from: {
+        server: 'c.us',
+        user: '918696260393',
+        _serialized: '918696260393@c.us'
+        },
+      to: {
+        server: 'c.us',
+        user: '918696260393',
+        _serialized: '918696260393@c.us'
+        },
+      self: 'out',
+      ack: 0,
+      isNewMsg: true,
+      star: false,
+      kicNotified: false,
+      isFromTemplate: false,
+      pollInvalidated: false,
+      isSentCagPollCreation: false,
+      latestEditMsgKey: null,
+      latestEditSenderTimestampMs: null,
+      mentionedJidList: [],
+      groupMentions: [],
+      isVcardOverMmsDocument: false,
+      isForwarded: false,
+      hasReaction: false,
+      disappearingModeInitiator: 'chat',
+      productHeaderImageRejected: false,
+      lastPlaybackProgress: 0,
+      isDynamicReplyButtonsMsg: false,
+      isMdHistoryMsg: false,
+      stickerSentTs: 0,
+      isAvatar: false,
+      lastUpdateFromServerTs: 0,
+      requiresDirectConnection: null,
+      invokedBotWid: null
+    },
+    mediaKey: undefined,
+    id: {
+      fromMe: true,
+      remote: {
+        server: 'c.us',
+        user: '918696260393',
+        _serialized: '918696260393@c.us'
+        },
+      id: '3EB0D471AED798BFFEC302',
+      self: 'out',
+      _serialized: 'true_918696260393@c.us_3EB0D471AED798BFFEC302_out'
+    },
+    ack: 0,
+    hasMedia: false,
+    body: 'test message 3',
+    type: 'chat',
+    timestamp: 1690044762,
+    from: '918696260393@c.us',
+    to: '918696260393@c.us',
+    author: undefined,
+    deviceType: 'android',
+    isForwarded: false,
+    forwardingScore: 0,
+    isStatus: false,
+    isStarred: false,
+    broadcast: undefined,
+    fromMe: true,
+    hasQuotedMsg: false,
+    hasReaction: false,
+    duration: undefined,
+    location: undefined,
+    vCards: [],
+    inviteV4: undefined,
+    mentionedIds: [],
+    orderId: undefined,
+    token: undefined,
+    isGif: false,
+    isEphemeral: undefined,
+    links: undefined
+}
