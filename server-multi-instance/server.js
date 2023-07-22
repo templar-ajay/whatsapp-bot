@@ -56,7 +56,7 @@ app.ws("/authenticate", function (ws, req) {
 });
 
 app.post("/send-message", (req, res) => {
-  const { clientId, phoneNumber, ...rest } = req?.body?.customData;
+  const { secret: clientId, phoneNumber, ...rest } = req?.body?.customData;
   const messages = extractMessages(rest);
 
   if (!(clientId && phoneNumber && messages.length))
