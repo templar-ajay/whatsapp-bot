@@ -34,7 +34,7 @@ app.get("/:clientId", (req, res) => {
   //     });
 });
 
-app.ws("/a", function (ws, req) {
+app.ws("/authenticate", function (ws, req) {
   console.log("ws request received", ws);
   ws.on("message", function (msg) {
     console.log("message received from client", msg);
@@ -72,6 +72,20 @@ app.post("/send-message", (req, res) => {
 });
 app.listen(8080, () => {
   console.log("server connected to port 8080");
+});
+
+app.post("/re-auth", (req, res) => {
+  const { clientId } = req.body;
+  console.log("clientId", clientId);
+  deleteClient(clientId)
+    .then(() => {
+      console.log("successfully deleted the client", clientId);
+      res.send({ response: "success" });
+    })
+    .catch((err) => {
+      console.log("unable to delete the client", clientId);
+      res.send({ response: "success" });
+    });
 });
 
 async function createAndSaveClient(clientId, ws) {
@@ -115,21 +129,30 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
       authStrategy: new LocalAuth({ clientId: clientId }),
     });
     client.on("qr", (qr) => {
-      qrcode.generate(qr, { small: true });
+      // qrcode.generate(qr, { small: true });
+      console.log("please authenticate the server with your whatsapp first");
+      errorSendingMessage(
+        "please authenticate the server with your whatsapp first"
+      );
+      // if (client) client.destroy();
     });
     client.on("ready", () => {
       console.log("Client is ready!");
+
       sendMessage(client, phoneNumber, messages)
         .then((response) => {
           console.log(response);
           messageSent(response);
           // destroys the client to make space for next client;
-          setTimeout(() => client.destroy(), 1000);
+          setTimeout(() => client.destroy(), 10000);
         })
         .catch((error) => {
           console.log(`failed to send message, error:`, error);
           errorSendingMessage(error);
         });
+    });
+    client.on("auth_failure", (err) => {
+      console.log("auth_failure", err);
     });
     client.on("disconnected", () => {
       console.log("client has disconnected");
@@ -146,7 +169,6 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
         );
       }, 500);
     });
-
     client.initialize();
   });
 }
@@ -174,4 +196,22 @@ function extractMessages(rest) {
   return Object.keys(rest)
     .filter((x) => x.includes("message"))
     .map((x) => rest[x]);
+}
+
+async function deleteClient(clientId) {
+  // const clientId = client.options.authStrategy.clientId;
+  // client.logout();
+  // remove auth files from storage
+  return new Promise(async (resolve, reject) => {
+    //   setTimeout(() => {
+    //     fs.rm(
+    //       path.resolve(__dirname, `./.wwebjs_auth/session-${clientId}`),
+    //       { recursive: true },
+    //       (err) => {
+    //         console.log(err ? reject(err) : resolve("file removed"));
+    //       }
+    //     );
+    //   }, 500);
+    resolve();
+  });
 }
