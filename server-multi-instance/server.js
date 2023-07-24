@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(function (req, res, next) {
-  console.log("middleware");
+  // console.log("middleware");
   req.testing = "testing";
 
   return next();
@@ -35,7 +35,7 @@ app.get("/:clientId", (req, res) => {
 });
 
 app.ws("/authenticate", function (ws, req) {
-  console.log("ws request received", ws);
+  // console.log("ws request received", ws);
   ws.on("message", function (msg) {
     console.log("message received from client", msg);
     const { command, clientId } = JSON.parse(msg);
