@@ -27,14 +27,20 @@ sudo apt install -y gconf-service libgbm-dev libasound2 libatk1.0-0 libc6 libcai
 server commands for hosting
 
 ```bash
+cd whatsapp-web.js-automatic-messaging-solution/
+npm install
+
 # installing the pm2 service
 npm install -g pm2
 
 # delete the logs after a certain amount of time
 pm2 install pm2-logrotate
+```
 
+start the server
+```
 # start the process using pm2
-pm2 start index.js --name myExpressServerName
+pm2 start server.js --name server
 
 # check logs of the process
 pm2 logs 1
