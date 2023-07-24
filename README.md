@@ -38,7 +38,7 @@ pm2 install pm2-logrotate
 ```
 
 start the server
-```
+```bash
 # start the process using pm2
 pm2 start server.js --name server
 
