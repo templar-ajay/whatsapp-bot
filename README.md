@@ -27,7 +27,7 @@ sudo apt install -y gconf-service libgbm-dev libasound2 libatk1.0-0 libc6 libcai
 server commands for hosting
 
 ```bash
-cd whatsapp-web.js-automatic-messaging-solution/
+cd whatsapp-web.js-automatic-messaging-solution/server-multi-instance/
 npm install
 
 # installing the pm2 service
