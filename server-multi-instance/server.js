@@ -12,47 +12,37 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(function (req, res, next) {
-  // console.log("middleware");
+  console.log("middleware");
   req.testing = "testing";
 
   return next();
 });
 
-app.get("/:clientId", (req, res) => {
-  res.send("this api no longer words upgrade to ws");
-
-  //   const { clientId } = req.params;
-  //   createAndSaveClient(clientId)
-  //     .then((data) =>
-  //       res.send("client created and saved successfully. clientId: " + data)
-  //     )
-  //     .catch((err) => {
-  //       console.log(
-  //         "failed to create client, maybe the client is already created",
-  //         err
-  //       );
-  //     });
-});
-
 app.ws("/authenticate", function (ws, req) {
   // console.log("ws request received", ws);
   ws.on("message", function (msg) {
-    // console.log("message received from client", msg);
+    console.log("message received from client", msg);
     const { command, clientId } = JSON.parse(msg);
     if (command == "createClient") {
       if (clientId?.length > 8) {
         // create a new client
         createAndSaveClient(clientId, ws)
           .then((clientId) => {
-            // console.log("clientID", clientId);
+            console.log("clientID", clientId);
             ws.send(
               JSON.stringify({ state: "client-ready", clientId: clientId })
             );
           })
-          .catch((err) => JSON.stringify({ result: "error", error: err }));
+          .catch((err) => {
+            console.log("unable to create client, reason:", err);
+            JSON.stringify({ result: "error", error: err });
+          });
       }
     }
   });
+  // ws.on("close", function () {
+  //   console.log("ws connection closed");
+  // });
 });
 
 app.post("/send-message", (req, res) => {
@@ -61,7 +51,7 @@ app.post("/send-message", (req, res) => {
 
   if (!(clientId && phoneNumber && messages.length))
     res.send("data insufficient to make a send message request");
-  // console.log("received message request for client:", clientId);
+  console.log("received message request for client:", clientId);
   createClientAndSendMessage({
     clientId: clientId,
     phoneNumber: phoneNumber,
@@ -71,7 +61,7 @@ app.post("/send-message", (req, res) => {
     .catch((err) => res.send(err));
 });
 app.listen(8080, () => {
-  // console.log("server connected to port 8080");
+  console.log("server connected to port 8080");
 });
 
 app.post("/re-auth", (req, res) => {
@@ -79,11 +69,11 @@ app.post("/re-auth", (req, res) => {
   // console.log("clientId", clientId);
   deleteClient(clientId)
     .then(() => {
-      // console.log("successfully deleted the client", clientId);
+      console.log("successfully deleted the client", clientId);
       res.send({ response: "success" });
     })
     .catch((err) => {
-      // console.log("unable to delete the client", clientId);
+      console.log("unable to delete the client", clientId);
       res.send({ response: "success" });
     });
 });
@@ -94,17 +84,20 @@ async function createAndSaveClient(clientId, ws) {
     const client = new Client({
       authStrategy: new LocalAuth({ clientId: clientId }),
     });
+    ws.onclose = () => {
+      unableToCreateClient("ws connection closed");
+    };
     client.on("qr", (qr) => {
       // qrcode.generate(qr, { small: true });
       ws.send(JSON.stringify({ state: "qr-received", qr: qr }));
     });
     client.on("ready", () => {
-      // console.log("Client is ready!");
+      console.log("Client is ready!");
       clientReady(clientId);
       setTimeout(() => client.destroy(), 2000);
     });
     client.on("disconnected", () => {
-      // console.log("client has disconnected");
+      console.log("client has disconnected");
       setTimeout(() => {
         fs.rm(
           path.resolve(
@@ -113,7 +106,7 @@ async function createAndSaveClient(clientId, ws) {
           ),
           { recursive: true },
           (err) => {
-            // console.log(err ? err : "file removed");
+            console.log(err ? err : "file removed");
           }
         );
       }, 500);
@@ -130,7 +123,7 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
     });
     client.on("qr", (qr) => {
       // qrcode.generate(qr, { small: true });
-      // console.log("please authenticate the server with your whatsapp first");
+      console.log("please authenticate the server with your whatsapp first");
       errorSendingMessage(
         "please authenticate the server with your whatsapp first"
       );
@@ -142,13 +135,13 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
       sendMessage(client, phoneNumber, messages)
         .then((response) => {
           // console.log(response);
-          messageSent(response);
+          messageSent({ success: true });
           // destroys the client to make space for next client;
           setTimeout(() => client.destroy(), 10000);
         })
         .catch((error) => {
-          // console.log(`failed to send message, error:`, error);
-          errorSendingMessage(error);
+          console.log(`failed to send message, error:`, error);
+          errorSendingMessage({ success: false });
         });
     });
     client.on("auth_failure", (err) => {
