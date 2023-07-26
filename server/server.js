@@ -1,25 +1,23 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
-require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
-const qrcode = require("qrcode-terminal");
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const expressWs = require("express-ws")(app);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const expressWs = require("express-ws")(app);
 
 app.use(function (req, res, next) {
-  console.log("middleware");
+  console.log("request received");
   req.testing = "testing";
 
   return next();
 });
 
 app.ws("/authenticate", function (ws, req) {
-  // console.log("ws request received", ws);
+  console.log("ws request received");
   ws.on("message", function (msg) {
     console.log("message received from client", msg);
     const { command, clientId } = JSON.parse(msg);
@@ -40,9 +38,6 @@ app.ws("/authenticate", function (ws, req) {
       }
     }
   });
-  // ws.on("close", function () {
-  //   console.log("ws connection closed");
-  // });
 });
 
 app.post("/send-message", (req, res) => {
@@ -66,7 +61,6 @@ app.listen(8080, () => {
 
 app.post("/re-auth", (req, res) => {
   const { clientId } = req.body;
-  // console.log("clientId", clientId);
   deleteClient(clientId)
     .then(() => {
       console.log("successfully deleted the client", clientId);
@@ -88,7 +82,7 @@ async function createAndSaveClient(clientId, ws) {
       unableToCreateClient("ws connection closed");
     };
     client.on("qr", (qr) => {
-      // qrcode.generate(qr, { small: true });
+      console.log("qr", qr);
       ws.send(JSON.stringify({ state: "qr-received", qr: qr }));
     });
     client.on("ready", () => {
@@ -122,7 +116,7 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
       authStrategy: new LocalAuth({ clientId: clientId }),
     });
     client.on("qr", (qr) => {
-      // qrcode.generate(qr, { small: true });
+      console.log("qr", qr);
       console.log("please authenticate the server with your whatsapp first");
       errorSendingMessage(
         "please authenticate the server with your whatsapp first"
@@ -145,10 +139,10 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
         });
     });
     client.on("auth_failure", (err) => {
-      // console.log("auth_failure", err);
+      console.log("auth_failure", err);
     });
     client.on("disconnected", () => {
-      // console.log("client has disconnected");
+      console.log("client has disconnected");
       setTimeout(() => {
         fs.rm(
           path.resolve(
@@ -157,7 +151,7 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
           ),
           { recursive: true },
           (err) => {
-            // console.log(err ? err : "file removed");
+            console.log(err ? err : "file removed");
           }
         );
       }, 500);
@@ -192,6 +186,7 @@ function extractMessages(rest) {
 }
 
 async function deleteClient(clientId) {
+  console.log("delete request received for client", clientId);
   // const clientId = client.options.authStrategy.clientId;
   // client.logout();
   // remove auth files from storage
