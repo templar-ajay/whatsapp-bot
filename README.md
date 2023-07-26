@@ -27,14 +27,15 @@ npm install -g pm2
 
 # delete the logs after a certain amount of time
 pm2 install pm2-logrotate
-
 ```
+
+````
 
 ```bash
 # start the process using pm2
-pm2 start index.js --name myExpressServerName
+pm2 start server.js --name server
 
 # check logs of the process
 pm2 logs 1
 # here 1 is the id of the process
-```
+````
