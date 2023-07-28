@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require("whatsapp-web.js");
+const { Client, LocalAuth, NoAuth } = require("whatsapp-web.js");
 const path = require("path");
 const fs = require("fs");
 const express = require("express");
@@ -82,7 +82,17 @@ async function createAndSaveClient(clientId, ws) {
   // console.log("creating client with clientId", clientId);
   return new Promise((clientReady, unableToCreateClient) => {
     clientsObj[clientId] = new Client({
-      authStrategy: new LocalAuth({ clientId: clientId }),
+      authStrategy: new NoAuth({ clientId: clientId }),
+      puppeteer: {
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-gpu",
+          "--disable-dev-shm-usage",
+          "--ignore-certificate-errors",
+        ],
+      },
     });
 
     let destruction = () => {};
@@ -93,8 +103,8 @@ async function createAndSaveClient(clientId, ws) {
         console.log("client destroyed");
         setTimeout(() => {
           // NOTE: this may create an error when sending message with a secret key whose auth files were deleted
-          deleteAuthFile(clientId);
-          console.log("auth file deleted");
+          // deleteAuthFile(clientId);
+          // console.log("auth file deleted");
           delete clientsObj[clientId];
           console.log("client removed from clientsObj");
         }, 1000);
@@ -114,24 +124,25 @@ async function createAndSaveClient(clientId, ws) {
       destruction();
       // setTimeout(() => clientsObj[clientId].destroy(), 3000);
     });
-    // clientsObj[clientId].on("disconnected", async () => {
-    //   console.log("client has disconnected");
 
-    //   try {
-    //     // Check if the client is still connected before destroying it
-    //     if (clientsObj[clientId].status === "authenticated") {
-    //       console.log("client is authenticated");
-    //       await clientsObj[clientId].destroy();
-    //     }
-    //     delete clientsObj[clientId];
-    //     console.log("deleted client from clientsObj");
-    //     setTimeout(() => {
-    //       deleteAuthFile(clientId); // Delete the authentication file
-    //     }, 2000);
-    //   } catch (err) {
-    //     console.log("Error destroying WhatsApp client:", err);
-    //   }
-    // });
+    clientsObj[clientId].on("disconnected", async (reason) => {
+      console.log("client has disconnected. Reason:", reason);
+      console.log("clientId of the client that disconnected", clientId);
+      // clientsObj[clientId].resetState();
+      // if (clientsObj[clientId].status === "ready") {
+      //   console.log("client is authenticated");
+      //   try {
+      //     await clientsObj[clientId].destroy();
+      //   } catch (err) {
+      //     console.log("Error destroying WhatsApp client:", err);
+      //   }
+      // }
+      delete clientsObj[clientId];
+      console.log("client deleted from clientsObj");
+      // setTimeout(() => {
+      //   deleteAuthFile(clientId);
+      // }, 1000);
+    });
 
     clientsObj[clientId].initialize();
   });

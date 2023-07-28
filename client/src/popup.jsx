@@ -112,7 +112,7 @@ function Popup() {
   return (
     <div className="container">
       <h1>
-        <span className="secondary-text">
+        <span className="secondary-text mb-3">
           {state == "qr-received" && "scan this qr code via whatsapp app"}
         </span>
       </h1>
@@ -154,13 +154,22 @@ function Popup() {
           </div>
         </>
       )}
-      {state == "qr-received" && <QRCodeSVG value={QRCode} />}
+      {state == "qr-received" && (
+        <>
+          <QRCodeSVG value={QRCode} />
+          <br />
+          <span className="secondary-text mt-3">
+            {state == "qr-received" &&
+              "please keep the extension open until the server is authenticated"}
+          </span>
+        </>
+      )}
       {state == "client-ready" && (
-        <div>
+        <div style={{ textAlign: "left" }}>
           <h1>Server is Authenticated Your Unique Secret Key is</h1>
           <EditableText text={authenticatedSecret} enableEdit={false} />
           <small>
-            if you want to re-authenticate server with another key,{" "}
+            if you want to re-authenticate server with another key{" "}
             <Button
               size="small"
               variant="plain"
@@ -169,6 +178,20 @@ function Popup() {
             >
               click here
             </Button>
+          </small>
+          <br />
+          <small>
+            <bold style={{ fontWeight: 700 }}>Note:</bold> before logging out
+            the server from whatsapp
+            <Button
+              size="small"
+              variant="plain"
+              onClick={handleReAuth}
+              className="reAuth-btn"
+            >
+              click here
+            </Button>
+            to disconnect the server first.
           </small>
         </div>
       )}
