@@ -9,6 +9,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const expressWs = require("express-ws")(app);
 
+const clientsObj = {};
+
 app.use(function (req, res, next) {
   console.log("request received");
   req.testing = "testing";
@@ -21,6 +23,7 @@ app.ws("/authenticate", function (ws, req) {
   ws.on("message", function (msg) {
     console.log("message received from client", msg);
     const { command, clientId } = JSON.parse(msg);
+
     if (command == "createClient") {
       if (clientId?.length > 8) {
         // create a new client
@@ -47,11 +50,14 @@ app.post("/send-message", (req, res) => {
   if (!(clientId && phoneNumber && messages.length))
     res.send("data insufficient to make a send message request");
   console.log("received message request for client:", clientId);
-  createClientAndSendMessage({
-    clientId: clientId,
-    phoneNumber: phoneNumber,
-    messages: messages,
-  })
+  // createClientAndSendMessage({
+  //   clientId: clientId,
+  //   phoneNumber: phoneNumber,
+  //   messages: messages,
+  // })
+  //   .then((data) => res.send(data))
+  //   .catch((err) => res.send(err));
+  sendMessage(clientsObj[clientId], phoneNumber, messages)
     .then((data) => res.send(data))
     .catch((err) => res.send(err));
 });
@@ -75,90 +81,109 @@ app.post("/re-auth", (req, res) => {
 async function createAndSaveClient(clientId, ws) {
   // console.log("creating client with clientId", clientId);
   return new Promise((clientReady, unableToCreateClient) => {
-    const client = new Client({
+    clientsObj[clientId] = new Client({
       authStrategy: new LocalAuth({ clientId: clientId }),
     });
+
+    let destruction = () => {};
+
     ws.onclose = () => {
+      destruction = () => {
+        clientsObj[clientId].destroy();
+        console.log("client destroyed");
+        setTimeout(() => {
+          // NOTE: this may create an error when sending message with a secret key whose auth files were deleted
+          deleteAuthFile(clientId);
+          console.log("auth file deleted");
+          delete clientsObj[clientId];
+          console.log("client removed from clientsObj");
+        }, 1000);
+      };
       unableToCreateClient("ws connection closed");
     };
-    client.on("qr", (qr) => {
+    clientsObj[clientId].on("qr", (qr) => {
       console.log("qr", qr);
+      destruction();
+
       ws.send(JSON.stringify({ state: "qr-received", qr: qr }));
+      // console.log(clientsObj[clientId]);
     });
-    client.on("ready", () => {
+    clientsObj[clientId].on("ready", () => {
       console.log("Client is ready!");
       clientReady(clientId);
-      setTimeout(() => client.destroy(), 2000);
+      destruction();
+      // setTimeout(() => clientsObj[clientId].destroy(), 3000);
     });
-    client.on("disconnected", () => {
+    clientsObj[clientId].on("disconnected", () => {
       console.log("client has disconnected");
+      delete clientsObj[clientId];
       setTimeout(() => {
         fs.rm(
           path.resolve(
             __dirname,
-            `./.wwebjs_auth/session-${client.options.authStrategy.clientId}`
+            `./.wwebjs_auth/session-${clientsObj[clientId].options.authStrategy.clientId}`
           ),
           { recursive: true },
           (err) => {
             console.log(err ? err : "file removed");
           }
         );
-      }, 500);
+      }, 2000);
     });
 
-    client.initialize();
+    clientsObj[clientId].initialize();
   });
 }
 
-async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
-  return new Promise((messageSent, errorSendingMessage) => {
-    const client = new Client({
-      authStrategy: new LocalAuth({ clientId: clientId }),
-    });
-    client.on("qr", (qr) => {
-      console.log("qr", qr);
-      console.log("please authenticate the server with your whatsapp first");
-      errorSendingMessage(
-        "please authenticate the server with your whatsapp first"
-      );
-      // if (client) client.destroy();
-    });
-    client.on("ready", () => {
-      // console.log("Client is ready!");
+// async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
+//   return new Promise((messageSent, errorSendingMessage) => {
+//     clientsObj[clientId] = new Client({
+//       authStrategy: new LocalAuth({ clientId: clientId }),
+//     });
+//     clientsObj[clientId].on("qr", (qr) => {
+//       console.log("qr", qr);
+//       console.log("please authenticate the server with your whatsapp first");
+//       errorSendingMessage(
+//         "please authenticate the server with your whatsapp first"
+//       );
+//       // if (client) client.destroy();
+//     });
+//     clientsObj[clientId].on("ready", () => {
+//       // console.log("Client is ready!");
 
-      sendMessage(client, phoneNumber, messages)
-        .then((response) => {
-          // console.log(response);
-          messageSent({ success: true });
-          // destroys the client to make space for next client;
-          setTimeout(() => client.destroy(), 10000);
-        })
-        .catch((error) => {
-          console.log(`failed to send message, error:`, error);
-          errorSendingMessage({ success: false });
-        });
-    });
-    client.on("auth_failure", (err) => {
-      console.log("auth_failure", err);
-    });
-    client.on("disconnected", () => {
-      console.log("client has disconnected");
-      setTimeout(() => {
-        fs.rm(
-          path.resolve(
-            __dirname,
-            `./.wwebjs_auth/session-${client.options.authStrategy.clientId}`
-          ),
-          { recursive: true },
-          (err) => {
-            console.log(err ? err : "file removed");
-          }
-        );
-      }, 500);
-    });
-    client.initialize();
-  });
-}
+//       sendMessage(clientsObj[clientId], phoneNumber, messages)
+//         .then((response) => {
+//           // console.log(response);
+//           messageSent({ success: true });
+//           // destroys the client to make space for next client;
+//           setTimeout(() => clientsObj[clientId].destroy(), 10000);
+//         })
+//         .catch((error) => {
+//           console.log(`failed to send message, error:`, error);
+//           errorSendingMessage({ success: false });
+//         });
+//     });
+//     clientsObj[clientId].on("auth_failure", (err) => {
+//       console.log("auth_failure", err);
+//     });
+//     clientsObj[clientId].on("disconnected", () => {
+//       console.log("client has disconnected");
+//       setTimeout(() => {
+//         fs.rm(
+//           path.resolve(
+//             __dirname,
+//             `./.wwebjs_auth/session-${clientsObj[clientId].options.authStrategy.clientId}`
+//           ),
+//           { recursive: true },
+//           (err) => {
+//             console.log(err ? err : "file removed");
+//           }
+//         );
+//       }, 500);
+//     });
+//     clientsObj[clientId].initialize();
+//   });
+// }
 async function sendMessage(
   client,
   phoneNumber = "918696260393",
@@ -166,6 +191,8 @@ async function sendMessage(
 ) {
   return new Promise((messageSent, err) => {
     const filtered = messages.filter((message) => message);
+    if (!client)
+      err("this secret key is not authenticated, please check the secret key");
     client
       ?.sendMessage(`${phoneNumber}@c.us`, filtered[random(0, filtered.length)])
       .then((response) => {
@@ -191,15 +218,45 @@ async function deleteClient(clientId) {
   // client.logout();
   // remove auth files from storage
   return new Promise(async (resolve, reject) => {
-    //   setTimeout(() => {
-    //     fs.rm(
-    //       path.resolve(__dirname, `./.wwebjs_auth/session-${clientId}`),
-    //       { recursive: true },
-    //       (err) => {
-    //         console.log(err ? reject(err) : resolve("file removed"));
-    //       }
-    //     );
-    //   }, 500);
-    resolve();
+    if (clientsObj[clientId]) {
+      console.log("deleting client", clientId);
+      await clientsObj[clientId]
+        .destroy()
+        .then((data) => {
+          console.log(data);
+          delete clientsObj[clientId];
+          setTimeout(() => {
+            deleteAuthFile(clientId);
+          }, 1000);
+          resolve();
+        })
+        .catch((err) => {
+          console.log(err);
+          reject();
+        });
+    } else {
+      console.log("client not found", clientId);
+      resolve();
+    }
+  });
+}
+
+function deleteAuthFile(clientId) {
+  const authFilePath = path.resolve(
+    __dirname,
+    `./.wwebjs_auth/session-${clientId}`
+  );
+  fs.access(authFilePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      console.log("Auth file does not exist for clientId:", clientId);
+    } else {
+      fs.rm(authFilePath, { recursive: true }, (err) => {
+        if (err) {
+          console.log("Error deleting auth file:", err);
+        } else {
+          console.log("Auth file removed for clientId:", clientId);
+        }
+      });
+    }
   });
 }

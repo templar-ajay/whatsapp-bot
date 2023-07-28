@@ -9,11 +9,20 @@ function Popup() {
   const [state, setState] = useState("start");
   const [QRCode, setQRCode] = useState("");
   const [secret, setSecret] = useState("");
+  const [authenticatedSecret, setAuthenticatedSecret] = useState("");
 
   function saveSecret(secret) {
     chrome.storage.local.set({ secret: secret }, function () {
       setSecret(secret);
     });
+  }
+  function saveAuthenticatedSecret(authenticatedSecret) {
+    chrome.storage.local.set(
+      { authenticatedSecret: authenticatedSecret },
+      function () {
+        setAuthenticatedSecret(authenticatedSecret);
+      }
+    );
   }
   async function generateNewKeyAndSave() {
     const secretKey = await generateKey();
@@ -22,9 +31,7 @@ function Popup() {
   async function reset() {
     await generateNewKeyAndSave();
     setState("start");
-    chrome.storage.local.set({ clientReady: "" }, function () {
-      console.log("client Ready saved as ''");
-    });
+    saveAuthenticatedSecret("");
   }
   function handleReAuth() {
     fetch("http://127.0.0.1:8080/re-auth", {
@@ -34,7 +41,7 @@ function Popup() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        clientId: secret,
+        clientId: authenticatedSecret,
       }),
     })
       .then(function (response) {
@@ -55,13 +62,14 @@ function Popup() {
   useEffect(() => {
     (async () => {
       chrome.storage.local.get(
-        ["secret", "clientReady"],
+        ["secret", "authenticatedSecret"],
         async function (result) {
           const localSecret = result["secret"];
-          const readyClient = result["clientReady"];
+          const readyClient = result["authenticatedSecret"];
           console.log(localSecret);
           setSecret(localSecret);
-          if (readyClient == localSecret && readyClient) {
+          setAuthenticatedSecret(readyClient);
+          if (readyClient) {
             setState("client-ready");
           } else if (!localSecret) {
             await generateNewKeyAndSave();
@@ -81,10 +89,11 @@ function Popup() {
       webSocket.send(
         JSON.stringify({ clientId: secret, command: "createClient" })
       );
+      // regenerate a new auth code
+      generateNewKeyAndSave();
     });
 
     webSocket.addEventListener("message", (event) => {
-      console.log(event.data);
       const message = JSON.parse(event.data);
       console.log("message", message);
       if (message == "") return;
@@ -92,12 +101,8 @@ function Popup() {
         setQRCode("");
         setState("client-ready");
         // tell local storage that the client is already logged in with this secret
-        chrome.storage.local.set(
-          { clientReady: message.clientId },
-          function () {
-            console.log("client ready saved for ", message.clientId);
-          }
-        );
+        saveAuthenticatedSecret(message.clientId);
+        console.log("client ready saved for ", authenticatedSecret);
       } else if (message.state == "qr-received") {
         setQRCode(message.qr);
         setState("qr-received");
@@ -113,7 +118,21 @@ function Popup() {
       </h1>
       {(state == "start" || state == "requesting-qr") && (
         <>
-          <EditableText handleChange={saveSecret} text={secret} />
+          {state != "requesting-qr" ? (
+            <EditableText
+              handleChange={saveSecret}
+              text={secret}
+              enableEdit={false}
+              enableCopy={true}
+            />
+          ) : (
+            <EditableText
+              handleChange={saveSecret}
+              text={"Please be Patient..."}
+              enableEdit={false}
+              enableCopy={false}
+            />
+          )}
           <div className="button-container">
             <Button
               variant="outlined"
@@ -139,7 +158,7 @@ function Popup() {
       {state == "client-ready" && (
         <div>
           <h1>Server is Authenticated Your Unique Secret Key is</h1>
-          <EditableText text={secret} enableEdit={false} />
+          <EditableText text={authenticatedSecret} enableEdit={false} />
           <small>
             if you want to re-authenticate server with another key,{" "}
             <Button

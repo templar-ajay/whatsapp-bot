@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 
-const EditableText = ({ text, handleChange, enableEdit = true }) => {
+const EditableText = ({
+  text,
+  handleChange,
+  enableEdit = true,
+  enableCopy = true,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleEdit = () => {
@@ -52,9 +57,11 @@ const EditableText = ({ text, handleChange, enableEdit = true }) => {
               Edit
             </button>
           )}
-          <button className="btn btn-outline-secondary" onClick={handleCopy}>
-            Copy
-          </button>
+          {enableCopy && (
+            <button className="btn btn-outline-secondary" onClick={handleCopy}>
+              Copy
+            </button>
+          )}
         </>
       )}
     </div>
