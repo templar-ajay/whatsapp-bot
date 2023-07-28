@@ -114,22 +114,24 @@ async function createAndSaveClient(clientId, ws) {
       destruction();
       // setTimeout(() => clientsObj[clientId].destroy(), 3000);
     });
-    clientsObj[clientId].on("disconnected", () => {
-      console.log("client has disconnected");
-      delete clientsObj[clientId];
-      setTimeout(() => {
-        fs.rm(
-          path.resolve(
-            __dirname,
-            `./.wwebjs_auth/session-${clientsObj[clientId].options.authStrategy.clientId}`
-          ),
-          { recursive: true },
-          (err) => {
-            console.log(err ? err : "file removed");
-          }
-        );
-      }, 2000);
-    });
+    // clientsObj[clientId].on("disconnected", async () => {
+    //   console.log("client has disconnected");
+
+    //   try {
+    //     // Check if the client is still connected before destroying it
+    //     if (clientsObj[clientId].status === "authenticated") {
+    //       console.log("client is authenticated");
+    //       await clientsObj[clientId].destroy();
+    //     }
+    //     delete clientsObj[clientId];
+    //     console.log("deleted client from clientsObj");
+    //     setTimeout(() => {
+    //       deleteAuthFile(clientId); // Delete the authentication file
+    //     }, 2000);
+    //   } catch (err) {
+    //     console.log("Error destroying WhatsApp client:", err);
+    //   }
+    // });
 
     clientsObj[clientId].initialize();
   });
