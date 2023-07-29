@@ -85,13 +85,7 @@ async function createAndSaveClient(clientId, ws) {
       authStrategy: new NoAuth({ clientId: clientId }),
       puppeteer: {
         headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-gpu",
-          "--disable-dev-shm-usage",
-          "--ignore-certificate-errors",
-        ],
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
     });
 
