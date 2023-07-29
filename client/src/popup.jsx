@@ -4,6 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import EditableText from "./components/SpecialInput.jsx";
 import { Button } from "@mui/joy";
 import generateKey from "./utilities/generateAPIKey.js";
+import { address } from "./keys.js";
 
 function Popup() {
   const [state, setState] = useState("start");
@@ -34,7 +35,7 @@ function Popup() {
     saveAuthenticatedSecret("");
   }
   function handleReAuth() {
-    fetch("http://127.0.0.1:8080/re-auth", {
+    fetch("http://" + address + ":8080/re-auth", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -81,7 +82,7 @@ function Popup() {
 
   function getQRCode() {
     setState("requesting-qr");
-    const webSocket = new WebSocket("ws://127.0.0.1:8080/authenticate");
+    const webSocket = new WebSocket("ws://" + address + ":8080/authenticate");
 
     webSocket.addEventListener("open", (event) => {
       console.log("connection opened");
