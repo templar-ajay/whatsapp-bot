@@ -51,7 +51,15 @@ app.ws("/authenticate", function (ws, req) {
 });
 
 app.post("/send-message", (req, res) => {
-  console.log("request received from", req.hostname);
+  console.log("request received from", req.socket.remoteAddress);
+  let reqFromCrm;
+  if (req.socket.remoteAddress == "::ffff:34.133.194.15") {
+    reqFromCrm = "request received from crm";
+    console.log(reqFromCrm);
+  } else {
+    reqFromCrm = "request is not from crm";
+    console.log(reqFromCrm);
+  }
   console.log("data received", req.body);
   const { secret: clientId, phoneNumber, ...rest } = req?.body?.customData;
   const messages = extractMessages(rest);
@@ -66,11 +74,11 @@ app.post("/send-message", (req, res) => {
   })
     .then((data) => {
       console.log("message sent:", data);
-      res.send(data);
+      res.send({ data: data, requestResource: reqFromCrm });
     })
     .catch((err) => {
       console.log("error sending message", err);
-      res.send(err);
+      res.send({ err: err, requestResource: reqFromCrm });
     });
   // sendMessage(clientsObj[clientId], phoneNumber, messages)
   //   .then((data) => res.send(data))
