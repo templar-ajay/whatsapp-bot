@@ -186,12 +186,12 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
           setTimeout(() => {
             a_client.destroy();
             console.log("client destroyed");
-          }, 3000);
-          messageSent({ success: true });
+            messageSent(response);
+          }, 10000);
         })
         .catch((error) => {
           console.log(`failed to send message, error:`, error);
-          errorSendingMessage({ success: false });
+          errorSendingMessage(error);
         });
     });
     a_client.on("auth_failure", (err) => {
