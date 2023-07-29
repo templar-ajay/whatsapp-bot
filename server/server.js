@@ -217,12 +217,18 @@ async function sendMessage(
   phoneNumber = "918696260393",
   messages = ["Jai Shree Ram"]
 ) {
+  const correctedPhoneNumber = phoneNumber
+    .replaceAll(" ", "")
+    .replaceAll("+", "");
   return new Promise((messageSent, err) => {
     const filtered = messages.filter((message) => message);
     if (!client)
       err("this secret key is not authenticated, please check the secret key");
     client
-      ?.sendMessage(`${phoneNumber}@c.us`, filtered[random(0, filtered.length)])
+      ?.sendMessage(
+        `${correctedPhoneNumber}@c.us`,
+        filtered[random(0, filtered.length)]
+      )
       .then((response) => {
         messageSent(response);
       })
