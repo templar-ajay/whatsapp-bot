@@ -14,8 +14,15 @@ const clientsObj = {};
 app.use(function (req, res, next) {
   console.log("request received");
   req.testing = "testing";
-
   return next();
+});
+
+app.get("/", (req, res) => {
+  console.log("hostname", req.hostname);
+  console.log("referer", req.headers.referer);
+  console.log("originalUrl", req.originalUrl);
+  console.log("url", req.url);
+  res.send("hi");
 });
 
 app.ws("/authenticate", function (ws, req) {
@@ -44,6 +51,8 @@ app.ws("/authenticate", function (ws, req) {
 });
 
 app.post("/send-message", (req, res) => {
+  console.log("request received from", req.hostname);
+  console.log("data received", req.body);
   const { secret: clientId, phoneNumber, ...rest } = req?.body?.customData;
   const messages = extractMessages(rest);
 
@@ -55,8 +64,14 @@ app.post("/send-message", (req, res) => {
     phoneNumber: phoneNumber,
     messages: messages,
   })
-    .then((data) => res.send(data))
-    .catch((err) => res.send(err));
+    .then((data) => {
+      console.log("message sent:", data);
+      res.send(data);
+    })
+    .catch((err) => {
+      console.log("error sending message", err);
+      res.send(err);
+    });
   // sendMessage(clientsObj[clientId], phoneNumber, messages)
   //   .then((data) => res.send(data))
   //   .catch((err) => res.send(err));
@@ -69,7 +84,7 @@ app.post("/re-auth", (req, res) => {
   const { clientId } = req.body;
   deleteClient(clientId)
     .then(() => {
-      console.log("successfully deleted the client", clientId);
+      console.log("started deletion of the old client", clientId);
       res.send({ response: "success" });
     })
     .catch((err) => {
@@ -89,45 +104,48 @@ async function createAndSaveClient(clientId, ws) {
       },
     });
 
-    let destruction = () => {};
+    let destroyed = false;
+
+    // self destructs the client instance in 3 minutes
+    // const selfDestruct = setTimeout(() => {
+    //   clientsObj[clientId].destroy();
+    //   setTimeout(() => {
+    //     deleteAuthFile(clientId);
+    //   }, 1000);
+    // }, 180000);
 
     ws.onclose = () => {
-      destruction = () => {
-        clientsObj[clientId].destroy();
-        console.log("client destroyed");
-        setTimeout(() => {
-          // NOTE: this may create an error when sending message with a secret key whose auth files were deleted
-          // deleteAuthFile(clientId);
-          // console.log("auth file deleted");
-          delete clientsObj[clientId];
-          console.log("client removed from clientsObj");
-        }, 1000);
-      };
+      if (!destroyed) {
+        destruction({
+          _client: clientsObj[clientId],
+          clientId: clientId,
+          _deleteAuthFile: true,
+          deleteFromClientsObj: true,
+          destroyClient: true,
+        });
+        destroyed = true;
+      }
       unableToCreateClient("ws connection closed");
     };
+
     clientsObj[clientId].on("qr", (qr) => {
       console.log("qr", qr);
-      destruction();
-
       ws.send(JSON.stringify({ state: "qr-received", qr: qr }));
-      // console.log(clientsObj[clientId]);
     });
+
     clientsObj[clientId].on("ready", () => {
       console.log("Client is ready!");
-      destruction = () => {
-        clientsObj[clientId].destroy();
-        console.log("client destroyed");
-        setTimeout(() => {
-          // NOTE: this may create an error when sending message with a secret key whose auth files were deleted
-          // deleteAuthFile(clientId);
-          // console.log("auth file deleted");
-          delete clientsObj[clientId];
-          console.log("client removed from clientsObj");
-          console.log("clientsObj", clientsObj);
-          clientReady(clientId);
-        }, 1000);
-      };
-      destruction();
+      if (!destroyed) {
+        destruction({
+          _client: clientsObj[clientId],
+          clientId: clientId,
+          _deleteAuthFile: false,
+          deleteFromClientsObj: true,
+          destroyClient: true,
+        });
+        destroyed = true;
+      }
+      clientReady(clientId);
     });
 
     clientsObj[clientId].on("disconnected", async (reason) => {
@@ -142,11 +160,16 @@ async function createAndSaveClient(clientId, ws) {
       //     console.log("Error destroying WhatsApp client:", err);
       //   }
       // }
-      delete clientsObj[clientId];
-      console.log("client deleted from clientsObj");
-      setTimeout(() => {
-        deleteAuthFile(clientId);
-      }, 1000);
+      if (!destroyed) {
+        destruction({
+          _client: clientsObj[clientId],
+          clientId: clientId,
+          _deleteAuthFile: true,
+          deleteFromClientsObj: true,
+          destroyClient: true,
+        });
+        destroyed = true;
+      }
     });
 
     clientsObj[clientId].initialize();
@@ -254,24 +277,60 @@ async function deleteClient(clientId) {
   return new Promise(async (resolve, reject) => {
     if (clientsObj[clientId]) {
       console.log("deleting client", clientId);
-      await clientsObj[clientId]
-        .destroy()
-        .then((data) => {
-          console.log(data);
-          delete clientsObj[clientId];
-          setTimeout(() => {
-            deleteAuthFile(clientId);
-          }, 1000);
-          resolve();
-        })
-        .catch((err) => {
-          console.log(err);
-          reject();
-        });
+      delete clientsObj[clientId];
+      clientsObj[clientId].destroy();
+      setTimeout(() => {
+        deleteAuthFile(clientId);
+      }, 1000);
+      resolve();
     } else {
       console.log("client not found", clientId);
+      deleteAuthFile(clientId);
       resolve();
     }
+
+    // console.log("logging out client:", clientId);
+    // a_client = new Client({
+    //   authStrategy: new LocalAuth({ clientId: clientId }),
+    //   puppeteer: {
+    //     headless: true,
+    //     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    //   },
+    // });
+
+    // a_client.on("qr", (qr) => {
+    //   console.log("client is already logged out");
+    //   destruction({
+    //     _client: a_client,
+    //     clientId: clientId,
+    //     _deleteAuthFile: true,
+    //     destroyClient: true,
+    //     deleteFromClientsObj: false,
+    //     callback: resolve,
+    //   });
+    // });
+    // a_client.on("ready", () => {
+    //   // console.log("Client is ready!");
+    //   setInterval(() => {
+    //     a_client
+    //       .logout()
+    //       .then(() => {
+    //         console.log("logged out client successfully");
+    //         destruction({
+    //           _client: a_client,
+    //           clientId: clientId,
+    //           _deleteAuthFile: true,
+    //           deleteFromClientsObj: false,
+    //           destroyClient: false,
+    //         });
+    //         resolve();
+    //       })
+    //       .catch((err) => {
+    //         console.log("error logging out", err);
+    //       });
+    //   }, 10000);
+    // });
+    // a_client.initialize();
   });
 }
 
@@ -293,4 +352,31 @@ function deleteAuthFile(clientId) {
       });
     }
   });
+}
+
+function destruction({
+  _client,
+  clientId,
+  _deleteAuthFile = true,
+  deleteFromClientsObj = true,
+  destroyClient = true,
+  callback = () => {},
+}) {
+  if (destroyClient) {
+    _client.destroy();
+  }
+  console.log("client destroyed");
+  if (deleteFromClientsObj) {
+    delete clientsObj[clientId];
+    console.log("client removed from clientsObj");
+  }
+  if (_deleteAuthFile) {
+    setTimeout(() => {
+      // NOTE: this may create an error when sending message with a secret key whose auth files were deleted
+      deleteAuthFile(clientId);
+      // console.log("auth file deleted");
+    }, 1000);
+  }
+  console.log("clientsObj", clientsObj);
+  callback();
 }
