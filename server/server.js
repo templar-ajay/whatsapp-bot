@@ -155,10 +155,16 @@ async function createAndSaveClient(clientId, ws) {
 
 async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
   console.log("clientsObj", clientsObj);
+
   return new Promise((messageSent, errorSendingMessage) => {
     a_client = new Client({
       authStrategy: new LocalAuth({ clientId: clientId }),
+      puppeteer: {
+        headless: true,
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      },
     });
+
     a_client.on("qr", (qr) => {
       console.log("qr", qr);
       console.log("please authenticate the server with your whatsapp first");
