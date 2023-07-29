@@ -52,8 +52,9 @@ app.ws("/authenticate", function (ws, req) {
 
 app.post("/send-message", (req, res) => {
   console.log("request received from", req.socket.remoteAddress);
+  console.log("request.hostname", req.hostname);
   let reqFromCrm;
-  if (req.socket.remoteAddress == "::ffff:34.133.194.15") {
+  if (req.socket.remoteAddress == "::ffff:34.171.80.138") {
     reqFromCrm = "request received from crm";
     console.log(reqFromCrm);
   } else {
