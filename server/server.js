@@ -186,7 +186,7 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
           setTimeout(() => {
             a_client.destroy();
             console.log("client destroyed");
-            messageSent(response);
+            messageSent(`message ${response.body} was sent to ${response.to}`);
           }, 10000);
         })
         .catch((error) => {
