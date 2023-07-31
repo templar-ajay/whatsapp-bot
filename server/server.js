@@ -85,6 +85,7 @@ app.post("/send-message", (req, res) => {
   //   .then((data) => res.send(data))
   //   .catch((err) => res.send(err));
 });
+
 app.listen(8080, () => {
   console.log("server connected to port 8080");
 });
@@ -244,6 +245,7 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
     a_client.initialize();
   });
 }
+
 async function sendMessage(
   client,
   phoneNumber = "918696260393",
@@ -261,7 +263,8 @@ async function sendMessage(
         `${correctedPhoneNumber}@c.us`,
         filtered[random(0, filtered.length)]
       )
-      .then((response) => {
+      .then(async (response) => {
+        await timer(10 * 1000);
         messageSent(response);
       })
       .catch((error) => {
@@ -388,4 +391,8 @@ function destruction({
   }
   console.log("clientsObj", clientsObj);
   callback();
+}
+
+function timer(ms) {
+  return new Promise((res) => setTimeout(res, ms));
 }
