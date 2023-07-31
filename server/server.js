@@ -214,12 +214,15 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
 
       sendMessage(a_client, phoneNumber, messages)
         .then((response) => {
-          // console.log(response);
+          console.log("destroying the client after 10 seconds");
           // destroys the client to make space for next client;
           setTimeout(() => {
-            a_client.destroy();
-            console.log("client destroyed");
-            messageSent(`message ${response.body} was sent to ${response.to}`);
+            a_client.destroy().then(() => {
+              console.log("client destroyed");
+              messageSent(
+                `message ${response.body} was sent to ${response.to}`
+              );
+            });
           }, 10000);
         })
         .catch((error) => {
@@ -251,20 +254,20 @@ async function sendMessage(
   phoneNumber = "918696260393",
   messages = ["Jai Shree Ram"]
 ) {
-  const correctedPhoneNumber = phoneNumber
-    .replaceAll(" ", "")
-    .replaceAll("+", "");
+  const wid = phoneNumber.replaceAll(" ", "").replaceAll("+", "") + "@c.us";
   return new Promise((messageSent, err) => {
     const filtered = messages.filter((message) => message);
     if (!client)
       err("this secret key is not authenticated, please check the secret key");
+    const theMessage = filtered[random(0, filtered.length)];
+    console.log("sending message:", theMessage, "to the wid", wid);
     client
-      ?.sendMessage(
-        `${correctedPhoneNumber}@c.us`,
-        filtered[random(0, filtered.length)]
-      )
+      ?.sendMessage(wid, theMessage)
       .then(async (response) => {
+        console.log("message sent", response);
+        console.log("awaiting 10 seconds");
         await timer(10 * 1000);
+        console.log("10 second wait complete");
         messageSent(response);
       })
       .catch((error) => {
