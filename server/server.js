@@ -106,7 +106,7 @@ async function createAndSaveClient(clientId, ws) {
       authStrategy: new LocalAuth({ clientId: clientId }),
       puppeteer: {
         headless: true,
-        // args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
     });
 
@@ -191,21 +191,23 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
       authStrategy: new LocalAuth({ clientId: clientId }),
       puppeteer: {
         headless: true,
-        // args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
     });
 
     a_client.on("qr", (qr) => {
       console.log("qr", qr);
       console.log("please authenticate the server with your whatsapp first");
-      errorSendingMessage(
-        "please authenticate the server with your whatsapp first"
-      );
-      a_client.destroy();
-      setTimeout(() => {
-        deleteAuthFile(clientId);
-      }, 1000);
+      complete("please authenticate the server with your whatsapp first");
+      destruction({
+        _client: a_client,
+        clientId: clientId,
+        _deleteAuthFile: true,
+        deleteFromClientsObj: false,
+        destroyClient: true,
+      });
     });
+
     a_client.on("ready", () => {
       // console.log("Client is ready!");
       let result;
@@ -228,9 +230,11 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
           });
         });
     });
+
     a_client.on("auth_failure", (err) => {
       console.log("auth_failure", err);
     });
+
     a_client.on("disconnected", () => {
       console.log("client has disconnected");
       setTimeout(() => {
@@ -243,6 +247,7 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
         );
       }, 1000);
     });
+
     a_client.initialize();
   });
 }
@@ -384,9 +389,9 @@ function deleteAuthFile(clientId) {
 function destruction({
   _client,
   clientId,
-  _deleteAuthFile = true,
-  deleteFromClientsObj = true,
-  destroyClient = true,
+  _deleteAuthFile = false,
+  deleteFromClientsObj = false,
+  destroyClient = false,
   callback = () => {},
 }) {
   if (destroyClient) {
