@@ -106,7 +106,7 @@ async function createAndSaveClient(clientId, ws) {
       authStrategy: new LocalAuth({ clientId: clientId }),
       puppeteer: {
         headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        // args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
     });
 
@@ -191,7 +191,7 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
       authStrategy: new LocalAuth({ clientId: clientId }),
       puppeteer: {
         headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        // args: ["--no-sandbox", "--disable-setuid-sandbox"],
       },
     });
 
