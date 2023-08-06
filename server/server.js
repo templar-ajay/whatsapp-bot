@@ -65,8 +65,12 @@ app.post("/send-message", (req, res) => {
   const { secret: clientId, phoneNumber, ...rest } = req?.body?.customData;
   const messages = extractMessages(rest);
 
-  if (!(clientId && phoneNumber && messages.length))
-    res.send("data insufficient to make a send message request");
+  if (!(clientId && phoneNumber && messages.length)) {
+    res.send(
+      "data insufficient to make a send message request. one secret, one phoneNumber and at least one message is required"
+    );
+    return;
+  }
   console.log("received message request for client:", clientId);
   createClientAndSendMessage({
     clientId: clientId,
@@ -92,10 +96,12 @@ app.post("/re-auth", (req, res) => {
     .then(() => {
       console.log("started deletion of the old client", clientId);
       res.send({ response: "success" });
+      return;
     })
     .catch((err) => {
       console.log("unable to delete the client", clientId);
       res.send({ response: "success" });
+      return;
     });
 });
 
@@ -185,71 +191,81 @@ async function createAndSaveClient(clientId, ws) {
 async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
   console.log("clientsObj", clientsObj);
   console.log("creating client");
+  const regex = /^[a-zA-Z0-9_-]*$/;
 
-  return new Promise((complete) => {
-    a_client = new Client({
-      authStrategy: new LocalAuth({ clientId: clientId }),
-      puppeteer: {
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      },
+  if (!clientId.match(regex)) {
+    return new Promise((complete) => {
+      complete(
+        "invalid client id: only alphanumeric characters, underscores and hyphens are allowed"
+      );
     });
-
-    a_client.on("qr", (qr) => {
-      console.log("qr", qr);
-      console.log("please authenticate the server with your whatsapp first");
-      complete("please authenticate the server with your whatsapp first");
-      destruction({
-        _client: a_client,
-        clientId: clientId,
-        _deleteAuthFile: true,
-        deleteFromClientsObj: false,
-        destroyClient: true,
+  } else {
+    return new Promise((complete) => {
+      a_client = new Client({
+        authStrategy: new LocalAuth({ clientId: clientId }),
+        puppeteer: {
+          headless: true,
+          args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        },
       });
-    });
 
-    a_client.on("ready", () => {
-      // console.log("Client is ready!");
-      let result;
-      sendMessage(a_client, phoneNumber, messages)
-        .then((response) => {
-          result = response;
-          console.log("message sent successfully", response);
-        })
-        .catch((error) => {
-          result = error;
-          console.log(`failed to send message, error:`, error);
-        })
-        .finally(() => {
-          console.log("destroying the client after 10 seconds");
-          // destroys the client to make space for next client;
-          a_client.destroy().then(async () => {
-            console.log("client destroyed");
-            await timer(5 * 1000);
-            complete(result);
-          });
+      a_client.on("qr", (qr) => {
+        console.log("qr", qr);
+        console.log("please authenticate the server with your whatsapp first");
+        complete("please authenticate the server with your whatsapp first");
+        destruction({
+          _client: a_client,
+          clientId: clientId,
+          _deleteAuthFile: true,
+          deleteFromClientsObj: false,
+          destroyClient: true,
         });
-    });
+      });
 
-    a_client.on("auth_failure", (err) => {
-      console.log("auth_failure", err);
-    });
+      a_client.on("ready", () => {
+        // console.log("Client is ready!");
+        let result;
+        sendMessage(a_client, phoneNumber, messages)
+          .then((response) => {
+            result = response;
+            console.log("message sent successfully", response);
+          })
+          .catch((error) => {
+            result = error;
+            console.log(`failed to send message, error:`, error);
+          })
+          .finally(() => {
+            console.log("destroying the client after 10 seconds");
+            // destroys the client to make space for next client;
+            a_client.destroy().then(async () => {
+              console.log("client destroyed");
+              await timer(5 * 1000);
+              complete(result);
+              return;
+            });
+          });
+      });
 
-    a_client.on("disconnected", () => {
-      console.log("client has disconnected");
-      setTimeout(() => {
-        fs.rm(
-          path.resolve(__dirname, `./.wwebjs_auth/session-${clientId}`),
-          { recursive: true },
-          (err) => {
-            console.log(err ? err : "file removed");
-          }
-        );
-      }, 1000);
-    });
+      a_client.on("auth_failure", (err) => {
+        console.log("auth_failure", err);
+      });
 
-    a_client.initialize();
-  });
+      a_client.on("disconnected", () => {
+        console.log("client has disconnected");
+        setTimeout(() => {
+          fs.rm(
+            path.resolve(__dirname, `./.wwebjs_auth/session-${clientId}`),
+            { recursive: true },
+            (err) => {
+              console.log(err ? err : "file removed");
+            }
+          );
+        }, 1000);
+      });
+
+      a_client.initialize();
+    });
+  }
 }
 
 async function sendMessage(
@@ -266,29 +282,28 @@ async function sendMessage(
       .replaceAll("-");
     console.log("clean Number", cleanNumber);
     const numberDetails = await client.getNumberId(cleanNumber);
-    if (numberDetails) {
-      const wid = numberDetails._serialized;
-
-      const filteredMessages = messages.filter((message) => message);
-      if (!client)
-        err(
-          "this secret key is not authenticated, please check the secret key"
-        );
-      const theMessage = filteredMessages[random(0, filteredMessages.length)];
-      console.log("sending message:", theMessage, "to the wid", wid);
-      client
-        ?.sendMessage(wid, theMessage)
-        .then(async (response) => {
-          console.log("message sent", response);
-          await timer(10 * 1000);
-          messageSent(`message ${response.body} was sent to ${response.to}`);
-        })
-        .catch((error) => {
-          err(error);
-        });
-    } else {
+    if (!numberDetails) {
       err(`the given number "${phoneNumber}"is not registered on whatsapp`);
+      return;
     }
+
+    const wid = numberDetails._serialized;
+
+    const filteredMessages = messages.filter((message) => message);
+    if (!client)
+      err("this secret key is not authenticated, please check the secret key");
+    const theMessage = filteredMessages[random(0, filteredMessages.length)];
+    console.log("sending message:", theMessage, "to the wid", wid);
+    client
+      ?.sendMessage(wid, theMessage)
+      .then(async (response) => {
+        console.log("message sent", response);
+        await timer(10 * 1000);
+        messageSent(`message ${response.body} was sent to ${response.to}`);
+      })
+      .catch((error) => {
+        err(error);
+      });
   });
 }
 
