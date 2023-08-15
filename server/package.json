@@ -2,7 +2,7 @@
   "name": "multi-server",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "server.js,Authentication.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
@@ -17,5 +17,8 @@
     "express": "4.18.2",
     "express-ws": "5.0.2",
     "whatsapp-web.js": "1.21.0"
+  },
+  "devDependencies": {
+    "pm2": "^5.3.0"
   }
 }

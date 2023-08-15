@@ -107,6 +107,9 @@ function Popup() {
       } else if (message.state == "qr-received") {
         setQRCode(message.qr);
         setState("qr-received");
+      } else if (message.state == "server-busy") {
+        setQRCode("");
+        setState("server-busy");
       }
     });
   }
@@ -195,6 +198,9 @@ function Popup() {
             to disconnect the server first.
           </small>
         </div>
+      )}
+      {state == "server-busy" && (
+        <h1>Server is busy, please try again after some time...</h1>
       )}
     </div>
   );
