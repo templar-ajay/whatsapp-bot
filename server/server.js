@@ -110,10 +110,10 @@ async function createAndSaveClient(clientId, ws) {
   return new Promise((clientReady, unableToCreateClient) => {
     clientsObj[clientId] = new Client({
       authStrategy: new LocalAuth({ clientId: clientId }),
-      puppeteer: {
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-      },
+      // puppeteer: {
+      //   headless: true,
+      //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      // },
     });
 
     let destroyed = false;
@@ -203,10 +203,10 @@ async function createClientAndSendMessage({ clientId, phoneNumber, messages }) {
     return new Promise((complete) => {
       a_client = new Client({
         authStrategy: new LocalAuth({ clientId: clientId }),
-        puppeteer: {
-          headless: true,
-          args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        },
+        // puppeteer: {
+        //   headless: true,
+        //   args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        // },
       });
 
       a_client.on("qr", (qr) => {
