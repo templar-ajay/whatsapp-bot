@@ -50,8 +50,9 @@ function Popup() {
       })
       .then(function (body) {
         console.log(body);
-        const { response } = body;
+        const { response, message } = body;
         if (response == "success") {
+          console.log("message", message);
           reset();
         }
       })

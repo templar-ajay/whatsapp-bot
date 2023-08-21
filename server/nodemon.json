@@ -1,0 +1,9 @@
+{
+    "ignore": [
+        "auth_info_baileys/*"
+    ],
+    "watch": [
+        "index.js",
+        "Utils/utils.js"
+    ]
+}
