@@ -31,7 +31,7 @@ async function createAndSaveClient(clientId, clientWS) {
 
       let connectionOpened = false;
 
-      clientWS.on("close", (reason) => {
+      clientWS.onclose = (reason) => {
         console.log("ws connection with extension closed", reason);
         sock.end("meriMarzi");
         if (!connectionOpened) {
@@ -45,7 +45,7 @@ async function createAndSaveClient(clientId, clientWS) {
         }
 
         console.log("current status of sock", sock);
-      });
+      }
 
       sock.ev.on("creds.update", saveCreds);
 
@@ -75,7 +75,9 @@ async function createAndSaveClient(clientId, clientWS) {
           }
         } else if (connection === "open") {
           console.log("opened connection");
-          connectionOpened = true;
+          
+          // remove the function from the onclose event
+          clientWS.onclose = null;
 
           //   end the client after 3 seconds
           setTimeout(() => {

@@ -31,9 +31,7 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
         const { connection, lastDisconnect, qr } = update;
         if (qr) {
           console.log("qr received", qr);
-          clientWS.send(
-            JSON.stringify({ state: "qr-received", qr: update.qr })
-          );
+          reject("this secret is not authenticated with any account")
         }
         if (connection === "close") {
           console.log("lastDisconnect", lastDisconnect);
@@ -83,19 +81,19 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
   });
 }
 
-async function sendMessage(sock, target, message) {
+async function sendMessage(sock, phoneNumber, message) {
   return new Promise(async (sent, failed) => {
     //   check if the phoneNumber exists on whatsapp
     const [result] = await sock.onWhatsApp(phoneNumber);
     if (result.exists) {
-      console.log(`${id} exists on WhatsApp, as jid: ${result.jid}`);
+      console.log(`${phoneNumber} exists on WhatsApp, as jid: ${result.jid}`);
     } else {
       failed("the provided phoneNumber does not exist on whatsapp");
       return;
     }
 
     sock
-      .sendMessage(`${target}@s.whatsapp.net`, {
+      .sendMessage(`${phoneNumber}@s.whatsapp.net`, {
         text: message,
       })
       .then((x) => {
