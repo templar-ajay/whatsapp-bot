@@ -59,7 +59,7 @@ app.post("/send-message", (req, res) => {
     return;
   }
 
-  if (!isClientFolderExists("./auth_info_baileys/" + clientId)) {
+  if (!isClientFolderExists(clientId)) {
     res.send(
       "Failed to send message: please check the secret key you have provided. In case you have lost your secret key, please copy it again from the chrome extension."
     );
@@ -103,8 +103,9 @@ app.post("/send-message", (req, res) => {
 
 app.post("/re-auth", async (req, res) => {
   const { clientId } = req.body;
+  console.log("clientID to remove", clientId);
   if (!clientId) {
-    res.send("failed: no clientId provided");
+    res.send({ response: "failed", reason: " no clientId provided" });
   }
   await waitFor(3 * 1000);
   if (isClientFolderExists(clientId)) {
@@ -130,7 +131,7 @@ app.post("/re-auth", async (req, res) => {
     });
   } else {
     res.send({
-      request: "success",
+      response: "success",
       message: "this client was already de-authenticated on our server",
     });
   }

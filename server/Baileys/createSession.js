@@ -4,6 +4,7 @@ import makeWASocket, {
   Browsers,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
+import { removeFilesAndFolder } from "../Utils/utils.js";
 
 async function createAndSaveClient(clientId, clientWS) {
   return new Promise(async (resolve, reject) => {
@@ -26,6 +27,24 @@ async function createAndSaveClient(clientId, clientWS) {
         auth: state,
         browser: Browsers.macOS("Baileys"),
         syncFullHistory: false,
+      });
+
+      let connectionOpened = false;
+
+      clientWS.on("close", (reason) => {
+        console.log("ws connection with extension closed", reason);
+        sock.end("meriMarzi");
+        if (!connectionOpened) {
+          removeFilesAndFolder(clientId)
+            .then((res) => {
+              console.log(res);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        }
+
+        console.log("current status of sock", sock);
       });
 
       sock.ev.on("creds.update", saveCreds);
@@ -56,6 +75,7 @@ async function createAndSaveClient(clientId, clientWS) {
           }
         } else if (connection === "open") {
           console.log("opened connection");
+          connectionOpened = true;
 
           //   end the client after 3 seconds
           setTimeout(() => {

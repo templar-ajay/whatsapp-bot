@@ -4,7 +4,6 @@ import makeWASocket, {
   Browsers,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
-import * as fs from "fs";
 
 async function createClientAndSendMessage(clientId, phoneNumber, message) {
   return new Promise(async (resolve, reject) => {
@@ -66,10 +65,8 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
               reject(err);
             })
             .finally(() => {
-              setTimeout(() => {
-                sock.end("meriMarzi");
-                console.log("socket closed");
-              }, 3000);
+              sock.end("meriMarzi");
+              console.log("socket closed");
             });
 
           //   end the client after 3 seconds
