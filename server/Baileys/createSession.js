@@ -32,20 +32,21 @@ async function createAndSaveClient(clientId, clientWS) {
       let connectionOpened = false;
 
       clientWS.onclose = (reason) => {
-        console.log("ws connection with extension closed", reason);
-        sock.end("meriMarzi");
-        if (!connectionOpened) {
-          removeFilesAndFolder(clientId)
-            .then((res) => {
-              console.log(res);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        }
-
-        console.log("current status of sock", sock);
-      }
+        // this timeout of 3 seconds is a soft patch for when the clientWs is closed unexpectedly
+        setTimeout(() => {
+          console.log("ws connection with extension closed", reason);
+          sock.end("meriMarzi");
+          if (!connectionOpened) {
+            removeFilesAndFolder(clientId)
+              .then((res) => {
+                console.log(res);
+              })
+              .catch((err) => {
+                console.log(err);
+              });
+          }
+        }, 3000);
+      };
 
       sock.ev.on("creds.update", saveCreds);
 
@@ -53,9 +54,20 @@ async function createAndSaveClient(clientId, clientWS) {
         const { connection, lastDisconnect, qr } = update;
         if (qr) {
           console.log("qr received", qr);
-          clientWS.send(
-            JSON.stringify({ state: "qr-received", qr: update.qr })
-          );
+          // to prevent sending message if the connection with client is already closed 
+          if (
+            !(
+              Number(clientWS.statusCode) >= 1001 &&
+              Number(clientWS.statusCode <= 1015)
+            )
+          ) {
+            clientWS.send(
+              JSON.stringify({ state: "qr-received", qr: update.qr })
+            );
+          } else {
+            // commenting this since the socket will anyways end from the setTimeout at line 36
+            // sock?.end("meriMarzi");
+          }
         }
         if (connection === "close") {
           console.log("lastDisconnect", lastDisconnect);
@@ -75,15 +87,16 @@ async function createAndSaveClient(clientId, clientWS) {
           }
         } else if (connection === "open") {
           console.log("opened connection");
-          
+
           // remove the function from the onclose event
           clientWS.onclose = null;
 
           //   end the client after 3 seconds
-          setTimeout(() => {
-            sock.end("meriMarzi");
-            resolve(clientId);
-          }, 3000);
+          // setTimeout(() => {
+          // end the socket with whatsapp instantly
+          sock.end("meriMarzi");
+          resolve(clientId);
+          // }, 3000);
         }
       });
 

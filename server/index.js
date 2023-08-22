@@ -107,7 +107,9 @@ app.post("/re-auth", async (req, res) => {
   if (!clientId) {
     res.send({ response: "failed", reason: " no clientId provided" });
   }
-  await waitFor(3 * 1000);
+  
+  // await waitFor(3 * 1000);
+
   if (isClientFolderExists(clientId)) {
     // remove the folder from the filesystem
     removeFilesAndFolder(clientId).then((result) => {
