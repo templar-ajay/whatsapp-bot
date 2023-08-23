@@ -52,6 +52,9 @@ app.ws("/authenticate", function (ws, req) {
   });
 });
 
+// to make sure ony one send message request is sent at a time with a secret key
+const currentRequests = {};
+
 app.post("/send-message", (req, res) => {
   const { secret: clientId, phoneNumber, ...rest } = req.body;
   if (!clientId) {
@@ -90,6 +93,16 @@ app.post("/send-message", (req, res) => {
     return;
   }
 
+  // if we already received a request from that secret key, respond failure to the client
+  if (!currentRequests[clientId]) {
+    currentRequests[clientId] = true;
+  } else {
+    res.send(
+      "failed: cannot send multiple requests at a time from the same secret key "
+    );
+    return;
+  }
+
   createClientAndSendMessage(clientId, formattedPhoneNumber, theSelectedMessage)
     .then((response) => {
       res.send("success: " + response);
@@ -98,6 +111,9 @@ app.post("/send-message", (req, res) => {
     .catch((err) => {
       res.send("error: " + err);
       return;
+    })
+    .finally(() => {
+      delete currentRequests[clientId];
     });
 });
 
@@ -107,7 +123,7 @@ app.post("/re-auth", async (req, res) => {
   if (!clientId) {
     res.send({ response: "failed", reason: " no clientId provided" });
   }
-  
+
   // await waitFor(3 * 1000);
 
   if (isClientFolderExists(clientId)) {
