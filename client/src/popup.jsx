@@ -183,7 +183,7 @@ function Popup() {
           </small>
           <br />
           <small>
-            <bold style={{ fontWeight: 700 }}>Note:</bold> before logging out
+            <strong style={{ fontWeight: 700 }}>Note:</strong> before logging out
             the server from whatsapp
             <Button
               size="small"

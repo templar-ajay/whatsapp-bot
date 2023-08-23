@@ -99,10 +99,12 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
 async function sendMessage(sock, phoneNumber, message) {
   return new Promise(async (sent, failed) => {
     //   check if the phoneNumber exists on whatsapp
-    const [result] = await sock.onWhatsApp(phoneNumber);
-    if (result.exists) {
-      console.log(`${phoneNumber} exists on WhatsApp, as jid: ${result.jid}`);
-    } else {
+    try {
+      const [result] = await sock.onWhatsApp(phoneNumber);
+      if (result.exists)
+        console.log(`${phoneNumber} exists on WhatsApp, as jid: ${result.jid}`);
+    } catch (err) {
+      console.log("sock.onWhatsapp error: ", err);
       failed("the provided phoneNumber does not exist on whatsapp");
       return;
     }
