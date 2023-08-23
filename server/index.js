@@ -1,4 +1,3 @@
-import path, { format } from "path";
 import express from "express";
 import cors from "cors";
 import { createAndSaveClient } from "./Baileys/createSession.js";
@@ -8,7 +7,6 @@ import {
   formatPhoneNumber,
   isClientFolderExists,
   removeFilesAndFolder,
-  waitFor,
 } from "./Utils/utils.js";
 
 const app = express();
@@ -64,7 +62,7 @@ app.post("/send-message", (req, res) => {
 
   if (!isClientFolderExists(clientId)) {
     res.send(
-      "Failed to send message: please check the secret key you have provided. In case you have lost your secret key, please copy it again from the chrome extension."
+      "Failed to send message: invalid secret key provided. Please get a valid secret key from the extension."
     );
     return;
   }
