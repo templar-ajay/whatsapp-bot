@@ -54,7 +54,11 @@ app.ws("/authenticate", function (ws, req) {
 const currentRequests = {};
 
 app.post("/send-message", (req, res) => {
-  const { secret: clientId, phoneNumber, ...rest } = req.body;
+  if(!req.body.customData){
+    res.send("Error: received no data. To send a message, please provide the secret, phoneNumber, and at least 1 message to choose from.")
+    return;
+  }
+  const { secret: clientId, phoneNumber, ...rest } = req.body.customData;
   if (!clientId) {
     res.send("Please provide a secret.");
     return;
