@@ -87,7 +87,6 @@ function Popup() {
 
     webSocket.addEventListener("open", (event) => {
       console.log("connection opened");
-
       webSocket.send(
         JSON.stringify({ clientId: secret, command: "createClient" })
       );
@@ -111,6 +110,7 @@ function Popup() {
       }
     });
   }
+
   return (
     <div className="container">
       <h1>
@@ -183,8 +183,8 @@ function Popup() {
           </small>
           <br />
           <small>
-            <strong style={{ fontWeight: 700 }}>Note:</strong> before logging out
-            the server from whatsapp
+            <strong style={{ fontWeight: 700 }}>Note:</strong> before logging
+            out the server from whatsapp
             <Button
               size="small"
               variant="plain"

@@ -9,27 +9,18 @@ function formatPhoneNumber(phoneNumber) {
     .replaceAll("+", "")
     .replaceAll("-", "");
 
-  const regex = /^\d+$/;
-  if (regex.test(formattedNumber)) {
-    return formattedNumber;
-  } else {
-    return false;
-  }
+  const digitsOnlyRegex = /^\d+$/;
+  return digitsOnlyRegex.test(formattedNumber) ? formattedNumber : false;
 }
 
 function selectMessageFrom(rest) {
   const messages = [];
   for (let key in rest) {
-    if (key.includes("message")) {
-      if (rest[key]) messages.push(rest[key]);
-    }
+    if (key.includes("message") && rest[key]) messages.push(rest[key]);
   }
-  if (messages.length) {
-    return messages[random(0, messages.length)];
-  } else {
-    return false;
-  }
+  return messages.length ? messages[random(0, messages.length)] : false;
 }
+
 function random(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -41,9 +32,7 @@ function isClientFolderExists(clientId) {
     const stats = fs.statSync(folderPath);
     return stats.isDirectory();
   } catch (error) {
-    if (error.code === "ENOENT") {
-      return false; // Folder does not exist
-    }
+    if (error.code === "ENOENT") return false; // Folder does not exist
     throw error; // Handle other errors
   }
 }
@@ -71,9 +60,7 @@ function removeFilesAndFolder(clientId) {
                         `Error removing file ${filePath}: ${error}`
                       );
                       resolve({ success: false, path: filePath, error: error });
-                    } else {
-                      resolve({ success: true });
-                    }
+                    } else resolve({ success: true });
                   });
                 } else if (stats.isDirectory()) {
                   removeFilesAndFolder(filePath)
@@ -89,13 +76,9 @@ function removeFilesAndFolder(clientId) {
                               path: filePath,
                               error: error,
                             });
-                          } else {
-                            resolve({ success: true });
-                          }
+                          } else resolve({ success: true });
                         });
-                      } else {
-                        resolve(result);
-                      }
+                      } else resolve(result);
                     })
                     .catch((error) => {
                       resolve({ success: false, path: filePath, error: error });
@@ -120,17 +103,11 @@ function removeFilesAndFolder(clientId) {
                     path: directoryPath,
                     error: error,
                   });
-                } else {
-                  resolve({ success: true });
-                }
+                } else resolve({ success: true });
               });
-            } else {
-              resolve({ success: false, failedRemovals: failedRemovals });
-            }
+            } else resolve({ success: false, failedRemovals: failedRemovals });
           })
-          .catch(() => {
-            resolve({ success: false });
-          });
+          .catch(() => resolve({ success: false }));
       }
     });
   });

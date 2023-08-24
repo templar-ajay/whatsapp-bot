@@ -10,10 +10,9 @@
 .button-container {
   display: flex;
   justify-content: space-between;
-  
 }
-.button-container button{
-  font-size:13px;
+.button-container button {
+  font-size: 13px;
 }
 
 .primary-text {

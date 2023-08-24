@@ -8,19 +8,11 @@ const EditableText = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  const handleEdit = () => setIsEditing(true);
+  const handleSave = () => setIsEditing(false);
+  const handleCopy = () => navigator.clipboard.writeText(text);
 
-  const handleSave = () => {
-    setIsEditing(false);
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-  };
-
-  //   <div class="input-group">
+  // <div class="input-group">
   //   <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username with two button addons">
   //   <button class="btn btn-outline-secondary" type="button">Button</button>
   //   <button class="btn btn-outline-secondary" type="button">Button</button>

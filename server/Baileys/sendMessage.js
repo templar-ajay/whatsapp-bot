@@ -1,6 +1,5 @@
 import makeWASocket, {
   DisconnectReason,
-  BufferJSON,
   Browsers,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
@@ -8,10 +7,7 @@ import { isClientFolderExists, removeFilesAndFolder } from "../Utils/utils.js";
 
 async function createClientAndSendMessage(clientId, phoneNumber, message) {
   return new Promise(async (resolve, reject) => {
-    if (!clientId) {
-      reject("clientId not provided");
-      return;
-    }
+    if (!clientId) return reject("clientId not provided");
     // check if the clientId is logged in
 
     const { state, saveCreds } = await useMultiFileAuthState(
@@ -20,7 +16,7 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
 
     function connectToWhatsApp() {
       const sock = makeWASocket.default({
-        //   printQRInTerminal: true,
+        // printQRInTerminal: true,
         auth: state,
         browser: Browsers.macOS("Baileys"),
         syncFullHistory: false,
@@ -48,9 +44,7 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
               `this secret is no longer authorized. You may have logged out the session from whatsapp app. We are removing this secret key from our servers. Please generate a new secret key from the extension`
             );
 
-            if (isClientFolderExists(clientId)) {
-              removeFilesAndFolder(clientId);
-            }
+            if (isClientFolderExists(clientId)) removeFilesAndFolder(clientId);
 
             return;
           }
@@ -61,11 +55,9 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
             shouldReconnect
           );
           // reconnect if not logged out
-          if (shouldReconnect) {
-            connectToWhatsApp();
-          }
+          if (shouldReconnect) connectToWhatsApp();
         } else if (connection === "open") {
-          //   sendMessage(sock, "918696260393", "Jai Shree Ram");
+          // sendMessage(sock, "918696260393", "Jai Shree Ram");
           console.log("opened connection");
 
           sendMessage(sock, phoneNumber, message)
@@ -81,8 +73,6 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
               sock.end("meriMarzi");
               console.log("socket closed");
             });
-
-          //   end the client after 3 seconds
         }
       });
 
@@ -98,7 +88,7 @@ async function createClientAndSendMessage(clientId, phoneNumber, message) {
 
 async function sendMessage(sock, phoneNumber, message) {
   return new Promise(async (sent, failed) => {
-    //   check if the phoneNumber exists on whatsapp
+    // check if the phoneNumber exists on whatsapp
     try {
       const [result] = await sock.onWhatsApp(phoneNumber);
       if (result.exists)
@@ -110,9 +100,7 @@ async function sendMessage(sock, phoneNumber, message) {
     }
 
     sock
-      .sendMessage(`${phoneNumber}@s.whatsapp.net`, {
-        text: message,
-      })
+      .sendMessage(`${phoneNumber}@s.whatsapp.net`, { text: message })
       .then((x) => {
         console.log("sock.sendMessage response", x);
         sent("message sent");

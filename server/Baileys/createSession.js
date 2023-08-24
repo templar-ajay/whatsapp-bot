@@ -1,6 +1,5 @@
 import makeWASocket, {
   DisconnectReason,
-  BufferJSON,
   Browsers,
   useMultiFileAuthState,
 } from "@whiskeysockets/baileys";
@@ -8,14 +7,9 @@ import { removeFilesAndFolder } from "../Utils/utils.js";
 
 async function createAndSaveClient(clientId, clientWS) {
   return new Promise(async (resolve, reject) => {
-    if (!clientId) {
-      reject("clientId not provided");
-      return;
-    }
-    if (!clientWS) {
-      reject("websocket connection with client not provided");
-      return;
-    }
+    if (!clientId) return reject("clientId not provided");
+    if (!clientWS)
+      return reject("websocket connection with client not provided");
 
     const { state, saveCreds } = await useMultiFileAuthState(
       "auth_info_baileys/" + clientId
@@ -38,12 +32,8 @@ async function createAndSaveClient(clientId, clientWS) {
           sock.end("meriMarzi");
           if (!connectionOpened) {
             removeFilesAndFolder(clientId)
-              .then((res) => {
-                console.log(res);
-              })
-              .catch((err) => {
-                console.log(err);
-              });
+              .then((res) => console.log(res))
+              .catch((err) => console.log(err));
           }
         }, 3000);
       };
@@ -54,7 +44,7 @@ async function createAndSaveClient(clientId, clientWS) {
         const { connection, lastDisconnect, qr } = update;
         if (qr) {
           console.log("qr received", qr);
-          // to prevent sending message if the connection with client is already closed 
+          // to prevent sending message if the connection with client is already closed
           if (
             !(
               Number(clientWS.statusCode) >= 1001 &&
@@ -82,21 +72,14 @@ async function createAndSaveClient(clientId, clientWS) {
             shouldReconnect
           );
           // reconnect if not logged out
-          if (shouldReconnect) {
-            connectToWhatsApp();
-          }
+          if (shouldReconnect) connectToWhatsApp();
         } else if (connection === "open") {
           console.log("opened connection");
-
           // remove the function from the onclose event
           clientWS.onclose = null;
-
-          //   end the client after 3 seconds
-          // setTimeout(() => {
           // end the socket with whatsapp instantly
           sock.end("meriMarzi");
           resolve(clientId);
-          // }, 3000);
         }
       });
 
