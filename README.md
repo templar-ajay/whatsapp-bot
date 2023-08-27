@@ -2,16 +2,35 @@
 
 a custom solution to send automated whatsapp messages using a CRM or POST requests.
 
-development commands
-`cd client`
-`npm i`
-`npm run dev`
-new split terminal
-`cd server`
-`npm i`
-`npm run dev`
+# development commands
+## To install the chrome extension 
+- `cd client`
+- `npm i`
+- `npm run dev`
+- goto `chrome://extensions/`
+- enable `developer mode`
+- click `load unpacked`
+- navigate to the `client` folder and select the `dist` folder
+## To start the server locally
+- `cd server`
+- `npm i`
+- `npm run dev`
 
-production commands for ubuntu
+- send message url - `http://localhost:8080/send-message`
+- request type - POST
+- JSON payload - 
+```json
+{
+  "customData":  {
+    "secret":"the secret key generated and authenticated by the chrome extension",
+    "phoneNumber":"the phone number you want to send message along with country code",
+    "message1":"the message you want to send",
+    "message2":"you can send multiple messages and the server will randomly choose one messsage and send it"
+  }
+}
+```
+
+# production commands for ubuntu
 
 ```bash
 # update ubuntu
