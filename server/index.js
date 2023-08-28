@@ -53,19 +53,27 @@ app.ws("/authenticate", function (ws, req) {
 const currentRequests = {};
 
 app.post("/send-message", (req, res) => {
-  if (!req.body.customData)
-    return res.send(
-      "Error: received no data. To send a message, please provide the secret, phoneNumber, and at least 1 message to choose from."
-    );
+  if (!req.body.customData) {
+    return res.status(400).json({
+      response: "failed",
+      reason:
+        "Error: received no data. To send a message, please provide the secret, phoneNumber, and at least 1 message to choose from.",
+    });
+  }
   const { secret: clientId, phoneNumber, ...rest } = req.body.customData;
 
   if (!clientId) return res.send("Please provide a secret.");
   if (!isClientFolderExists(clientId))
-    return res.send(
-      "Failed to send message: invalid secret key provided. Please get a valid secret key from the extension."
-    );
+    return res.status(400).json({
+      response: "failed",
+      reason:
+        "Failed to send message: invalid secret key provided. Please get a valid secret key from the extension.",
+    });
   if (!phoneNumber)
-    return res.send("please provide a phoneNumber to send the message to.");
+    return res.status(400).json({
+      response: "failed",
+      reason: "please provide a phoneNumber to send the message to.",
+    });
 
   console.log("clientId", clientId);
   console.log("phoneNumber", phoneNumber);
@@ -75,24 +83,36 @@ app.post("/send-message", (req, res) => {
   console.log("theSelectedMessage", theSelectedMessage);
 
   if (!theSelectedMessage)
-    return res.send("please provide at least one message to choose from");
+    return res.status(400).json({
+      response: "failed",
+      reason: "please provide at least one message to choose from",
+    });
 
   const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
   console.log("formattedPhoneNumber", formattedPhoneNumber);
 
   if (!formattedPhoneNumber)
-    return res.send("the phoneNumber provided is in incorrect format");
+    return res.status(400).json({
+      response: "failed",
+      reason: "the phoneNumber provided is in incorrect format",
+    });
 
   // if we already received a request from that secret key, respond failure to the client
   if (!currentRequests[clientId]) currentRequests[clientId] = true;
   else
-    return res.send(
-      "failed: cannot send multiple requests at a time from the same secret key "
-    );
+    return res.status(400).json({
+      response: "failed",
+      reason:
+        "failed: cannot send multiple requests at a time from the same secret key ",
+    });
 
   createClientAndSendMessage(clientId, formattedPhoneNumber, theSelectedMessage)
-    .then((response) => res.send("success: " + response))
-    .catch((err) => res.send("error: " + err))
+    .then((response) =>
+      res.status(200).json({ response: "success", reason: response })
+    )
+    .catch((err) =>
+      res.status(400).json({ response: failed, reason: "error: " + err })
+    )
     .finally(() => {
       delete currentRequests[clientId];
     });
@@ -101,8 +121,10 @@ app.post("/send-message", (req, res) => {
 app.post("/re-auth", async (req, res) => {
   const { clientId } = req.body;
   console.log("clientID to remove", clientId);
-  if (!clientId)
-    return res.send({ response: "failed", reason: " no clientId provided" });
+  if (!clientId) {
+    res.send({ response: "failed", reason: " no clientId provided" });
+    return;
+  }
 
   // await waitFor(3 * 1000);
 
